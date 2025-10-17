@@ -36,7 +36,7 @@ for company in "${COMPANY_ARRAY[@]}"; do
         echo "  Creating config.json..."
         cat > "$config_file" << EOF
 {
-  "company": "$(echo $company | sed 's/.*/\u&/')";
+  "company": "$(echo $company | sed 's/.*/\u&/')",
   "commitments": {
     "development": {
       "limit": 20,
@@ -63,6 +63,11 @@ EOF
     fi
 done
 
+# Get company abbreviations
+echo ""
+echo "Company abbreviations allow quick time logging (e.g., 'hm 2h on task')."
+read -p "Enter abbreviations for companies (format: Company1:abbr1:abbr2,Company2:abbr3) [optional]: " COMPANY_ABBREVS
+
 # Get timezone
 echo ""
 read -p "Timezone offset from UTC (e.g., 10 for AEST, -5 for EST) [0]: " TZ_OFFSET
@@ -80,7 +85,9 @@ echo "1. Build the project:"
 echo "   npm install"
 echo "   npm run build"
 echo ""
-echo "2. Add to Claude Desktop config:"
+echo "2. Add to Claude config:"
+echo ""
+echo "   For Claude Desktop:"
 echo "   File: ~/Library/Application Support/Claude/claude_desktop_config.json"
 echo ""
 echo '   {'
@@ -91,6 +98,9 @@ echo "         \"args\": [\"$(pwd)/dist/server.js\"],"
 echo '         "env": {'
 echo "           \"TIME_TRACKING_DIR\": \"$TRACKING_DIR\","
 echo "           \"COMPANIES\": \"$COMPANIES\","
+if [ -n "$COMPANY_ABBREVS" ]; then
+echo "           \"COMPANY_ABBREVIATIONS\": \"$COMPANY_ABBREVS\","
+fi
 echo "           \"DISPLAY_TIMEZONE_OFFSET\": \"$TZ_OFFSET\","
 echo "           \"DISPLAY_TIMEZONE_STRING\": \"$TZ_STRING\""
 echo '         }'
@@ -98,7 +108,28 @@ echo '       }'
 echo '     }'
 echo '   }'
 echo ""
-echo "3. Restart Claude Desktop"
+echo "   For Claude Code CLI:"
+echo "   File: ~/.config/claude-code/settings.json"
+echo ""
+echo '   {'
+echo '     "mcpServers": {'
+echo '       "TimeTracking": {'
+echo '         "command": "node",'
+echo "         \"args\": [\"$(pwd)/dist/server.js\"],"
+echo '         "env": {'
+echo "           \"TIME_TRACKING_DIR\": \"$TRACKING_DIR\","
+echo "           \"COMPANIES\": \"$COMPANIES\","
+if [ -n "$COMPANY_ABBREVS" ]; then
+echo "           \"COMPANY_ABBREVIATIONS\": \"$COMPANY_ABBREVS\","
+fi
+echo "           \"DISPLAY_TIMEZONE_OFFSET\": \"$TZ_OFFSET\","
+echo "           \"DISPLAY_TIMEZONE_STRING\": \"$TZ_STRING\""
+echo '         }'
+echo '       }'
+echo '     }'
+echo '   }'
+echo ""
+echo "3. Restart Claude Desktop or Claude Code CLI"
 echo ""
 echo "4. Try it out:"
 echo '   "Just spent 2 hours on project work"'
