@@ -221,7 +221,7 @@ export class MarkdownManager {
 
             // Try flexible parsing first (if enabled)
             if (TimeTrackingEnvironment.flexibleDurationParsing) {
-                const flexMatch = line.match(/^- (\d{2}:\d{2}) (.+?) \((.+?)\)(.*)?$/);
+                const flexMatch = line.match(/^- (\d{2}:\d{2}) (.+) \((.+?)\)(.*)?$/);
                 if (flexMatch && currentDate) {
                     const [, time, task, durationStr, tagsStr] = flexMatch;
 
@@ -247,7 +247,7 @@ export class MarkdownManager {
 
             // Strict parsing: - HH:MM Task (Xh) #tag1 #tag2
             if (!parsed) {
-                const entryMatch = line.match(/^- (\d{2}:\d{2}) (.+?) \((\d+(?:\.\d+)?)h\)(.*)?$/);
+                const entryMatch = line.match(/^- (\d{2}:\d{2}) (.+) \((\d+(?:\.\d+)?)h\)(.*)?$/);
                 if (entryMatch && currentDate) {
                     const [, time, task, duration, tagsStr] = entryMatch;
                     const tags = tagsStr ?
@@ -384,7 +384,7 @@ export class MarkdownManager {
 
         for (const line of lines) {
             // Try to match entry with any duration format
-            const match = line.match(/^(- \d{2}:\d{2} .+? )\((.+?)\)(.*)$/);
+            const match = line.match(/^(- \d{2}:\d{2} .+) \((.+?)\)(.*)$/);
             if (match) {
                 const [, prefix, durationStr, suffix] = match;
                 try {
