@@ -1,0 +1,45 @@
+{
+  "company": "HeliMods",
+  "commitments": {
+    "development": {
+      "limit": 20,
+      "unit": "hours/week"
+    },
+    "meeting": {
+      "limit": 5,
+      "unit": "hours/week"
+    },
+    "total": {
+      "limit": 25,
+      "unit": "hours/week"
+    }
+  },
+  "projects": {
+    "Conduit MCP": {
+      "tags": ["development", "security", "database"],
+      "commitment": "development"
+    },
+    "Internal Tools": {
+      "tags": ["development", "tooling", "automation"],
+      "commitment": "development"
+    },
+    "Client Work": {
+      "tags": ["consulting", "implementation"],
+      "commitment": "development"
+    },
+    "Meetings": {
+      "tags": ["meeting", "standup", "planning"],
+      "commitment": "meeting"
+    }
+  },
+  "tagMappings": {
+    "dev": "development",
+    "code": "development",
+    "coding": "development",
+    "sync": "meeting",
+    "standup": "meeting",
+    "call": "meeting",
+    "admin": "admin",
+    "email": "admin"
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "name": "time-tracking-mcp",
+  "version": "0.1.0",
+  "description": "Model Context Protocol (MCP) server for natural language time tracking",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc && cp package.json dist/",
+    "start": "node dist/server.js",
+    "dev": "node --watch --experimental-strip-types src/server.ts",
+    "clean": "rm -rf dist",
+    "rebuild": "npm run clean && npm run build",
+    "test": "echo \"No tests yet\" && exit 0",
+    "release": "commit-and-tag-version",
+    "release:dry": "commit-and-tag-version --dry-run",
+    "release:minor": "commit-and-tag-version --release-as minor",
+    "release:major": "commit-and-tag-version --release-as major",
+    "postrelease": "git push --follow-tags"
+  },
+  "keywords": [
+    "mcp",
+    "time-tracking",
+    "natural-language",
+    "productivity",
+    "claude"
+  ],
+  "author": "Mark Wharton",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.19.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "commit-and-tag-version": "^12.5.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "commit-and-tag-version": {
+    "types": [
+      {
+        "type": "feat",
+        "section": "Features"
+      },
+      {
+        "type": "fix",
+        "section": "Bug Fixes"
+      },
+      {
+        "type": "perf",
+        "section": "Performance Improvements"
+      },
+      {
+        "type": "refactor",
+        "section": "Code Refactoring"
+      },
+      {
+        "type": "docs",
+        "hidden": true
+      },
+      {
+        "type": "style",
+        "hidden": true
+      },
+      {
+        "type": "test",
+        "hidden": true
+      },
+      {
+        "type": "build",
+        "hidden": true
+      },
+      {
+        "type": "ci",
+        "hidden": true
+      },
+      {
+        "type": "chore",
+        "hidden": true
+      }
+    ],
+    "header": "# Changelog\n\nAll notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.\n"
+  }
+}

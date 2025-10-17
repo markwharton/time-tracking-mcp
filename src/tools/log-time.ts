@@ -1,0 +1,135 @@
+// src/tools/log-time.ts
+import { registerTool } from './registry.js';
+import { MarkdownManager } from '../services/markdown-manager.js';
+import { parseDuration } from '../services/duration-parser.js';
+import { parseDate, parseTime, formatDate, formatTime, getISOWeek } from '../utils/date-utils.js';
+import { createTextResponse, withErrorHandler } from '../utils/tool-response.js';
+import { TimeTrackingEnvironment } from '../config/environment.js';
+import type { LogTimeInput, TimeEntry } from '../types/index.js';
+
+const markdownManager = new MarkdownManager();
+
+registerTool({
+    name: 'log_time',
+    description: `Log a completed time entry. This tool records work you've done.
+
+Natural language examples Claude should parse:
+- "2h on security review" → task: "security review", duration: "2h"
+- "Client meeting yesterday 90 minutes" → task: "Client meeting", duration: "90m", date: "yesterday"
+- "Just finished 1.5h on code review" → task: "code review", duration: "1.5h"
+
+Claude should extract:
+- task: What was worked on
+- duration: How long (2h, 90m, 1.5h, etc.)
+- time: When (optional, defaults to now)
+- date: Which day (optional, defaults to today)
+- tags: Inferred or explicit tags
+- company: Which company (optional, uses default)`,
+    inputSchema: {
+        type: 'object',
+        properties: {
+            task: {
+                type: 'string',
+                description: 'Task description (e.g., "Conduit MCP: Security review")'
+            },
+            duration: {
+                type: 'string',
+                description: 'Duration (e.g., "2h", "90m", "1.5h")'
+            },
+            time: {
+                type: 'string',
+                description: 'Time when work was done (e.g., "14:30", "2 hours ago", omit for now)'
+            },
+            date: {
+                type: 'string',
+                description: 'Date of work (e.g., "today", "yesterday", "2025-10-17", omit for today)'
+            },
+            tags: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Tags to categorize work (e.g., ["development", "security"])'
+            },
+            company: {
+                type: 'string',
+                description: 'Company to log time for (optional, uses default if omitted)'
+            }
+        },
+        required: ['task', 'duration']
+    },
+    annotations: {
+        title: 'Log Time',
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false
+    },
+    handler: withErrorHandler('logging time', async (args: LogTimeInput) => {
+        // Parse inputs
+        const company = args.company || TimeTrackingEnvironment.defaultCompany;
+        const duration = parseDuration(args.duration);
+        const date = parseDate(args.date);
+        const time = parseTime(args.time, date);
+        const tags = args.tags || [];
+
+        // Create time entry
+        const entry: TimeEntry = {
+            time: formatTime(time),
+            task: args.task,
+            duration: duration.hours,
+            tags,
+            date: formatDate(date)
+        };
+
+        // Save to markdown
+        await markdownManager.addEntry(company, entry);
+
+        // Load weekly summary for confirmation
+        const { year, week } = getISOWeek(date);
+        const summary = await markdownManager.getWeeklySummary(company, year, week);
+
+        // Build response
+        let response = `✓ Logged ${duration.formatted} for "${args.task}" at ${entry.time}`;
+
+        if (args.date && args.date !== 'today') {
+            response += ` on ${entry.date}`;
+        }
+
+        if (tags.length > 0) {
+            response += ` [${tags.map(t => '#' + t).join(' ')}]`;
+        }
+
+        response += '\n\n';
+
+        if (summary) {
+            response += `**Week ${week} Status:**\n`;
+            response += `• Total: ${summary.totalHours.toFixed(1)}h`;
+
+            const config = await markdownManager.loadConfig(company);
+            if (config.commitments.total) {
+                const limit = config.commitments.total.limit;
+                const percent = Math.round((summary.totalHours / limit) * 100);
+                response += ` / ${limit}h (${percent}%)`;
+
+                if (percent > 100) {
+                    response += ` ⚠️ OVER LIMIT`;
+                } else if (percent > 90) {
+                    response += ` ⚠️ Close to limit`;
+                }
+            }
+
+            response += '\n';
+
+            // Show commitment breakdown
+            for (const [commitment, hours] of Object.entries(summary.byCommitment)) {
+                const limit = config.commitments[commitment]?.limit;
+                if (limit) {
+                    const percent = Math.round((hours / limit) * 100);
+                    const warning = percent > 100 ? ' ⚠️' : '';
+                    response += `• ${commitment.charAt(0).toUpperCase() + commitment.slice(1)}: ${hours.toFixed(1)}h / ${limit}h (${percent}%)${warning}\n`;
+                }
+            }
+        }
+
+        return createTextResponse(response);
+    })
+});
