@@ -279,6 +279,32 @@ Each company directory should have a `config.json`:
 - **tagMappings**: Create shortcuts
   - Map informal tags to formal commitment names
 
+### Understanding Commitments vs Tags
+
+**Commitments** track against hour limits and trigger warnings:
+- Defined in `config.json` with specific limits
+- Example: `development: 20h/week`, `meeting: 5h/week`
+- Tags mapped to commitments count against those limits
+- Exceeding commitment limits shows ⚠️ warnings
+
+**Tags** provide visibility without commitment enforcement:
+- All tagged hours count toward your total weekly limit
+- Only tags mapped to commitments count against specific commitment limits
+- Unmapped tags (like `#learn`, `#research`, `#admin`) are tracked for visibility but don't trigger warnings
+- Great for tracking activities that don't fit formal commitments
+
+**Example:**
+```
+Weekly total: 25h limit
+- 20h with #development tag → counts against development commitment (20h limit)
+- 2h with #learn tag → counts toward total (25h), no specific commitment
+- 3h with #meeting tag → counts against meeting commitment (5h limit)
+
+Result: 25h total, development at limit, meeting under limit, #learn visible in reports
+```
+
+This lets you track all your time while only enforcing limits on specific commitment categories.
+
 ## Multi-Company Usage
 
 ### Prefix Pattern
