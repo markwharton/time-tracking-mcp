@@ -139,7 +139,7 @@ You: "Show me this week's report"
 Claude: [Detailed weekly report with breakdown by day, project, and tags]
 ```
 
-See [docs/usage-examples.md](docs/usage-examples.md) for more examples.
+See [docs/usage-examples.md](docs/usage-examples.md) for more examples and advanced features.
 
 ## How It Works
 

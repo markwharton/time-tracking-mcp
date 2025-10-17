@@ -212,17 +212,20 @@ Claude understands various ways of expressing the same thing:
 - **Minutes:** "90m", "90 minutes", "ninety minutes"
 - **Mixed:** "2 hours 30 minutes", "2h30m"
 - **Casual:** "half an hour", "quarter hour"
+- **Plain numbers:** "2" (defaults to hours: "2h")
+- **ISO 8601:** "PT2H30M" (2 hours 30 minutes)
 
 ### Time References
 
 - **Absolute:** "at 14:30", "at 2pm", "at 2:30"
 - **Relative:** "2 hours ago", "this morning", "yesterday afternoon"
+- **Time of day:** "morning" (9am), "afternoon" (2pm), "evening" (6pm)
 - **Implied:** "just finished" (means now)
 
 ### Date References
 
 - **Specific:** "2025-10-17", "October 17"
-- **Relative:** "today", "yesterday", "last Monday"
+- **Relative:** "today", "yesterday", "tomorrow", "last Monday"
 - **Implied:** If no date mentioned, defaults to today
 
 ## Tips for Best Results
@@ -369,3 +372,137 @@ Claude: "📊 Week 42 Status
 ```
 
 This helps you see time distribution across your projects without manually tracking them.
+
+## Advanced Features
+
+### ISO 8601 Duration Format
+
+For programmatic use or advanced integrations, the system supports ISO 8601 duration format:
+
+```
+You: "Client meeting PT1H30M"
+# Parses as 1 hour 30 minutes (1.5h)
+
+You: "PT2H on development"
+# Parses as 2 hours
+
+You: "Deep work session PT3H45M"
+# Parses as 3 hours 45 minutes (3.75h)
+```
+
+**Format:** `PT[hours]H[minutes]M[seconds]S`
+- `PT2H` = 2 hours
+- `PT30M` = 30 minutes
+- `PT2H30M` = 2 hours 30 minutes
+- `PT1H30M45S` = 1 hour 30 minutes 45 seconds
+
+### Plain Number Durations
+
+If you just provide a number without units, it defaults to hours:
+
+```
+You: "2 on security review"
+# Interpreted as 2h (2 hours)
+
+You: "1.5 on client meeting"
+# Interpreted as 1.5h (1 hour 30 minutes)
+```
+
+**Note:** This is primarily useful for quick entries. For clarity, prefer explicit units like "2h" or "90m".
+
+### Time of Day Keywords
+
+Natural language time-of-day references automatically map to standard times:
+
+```
+You: "Yesterday morning I worked 3h on code review"
+# "morning" = 9:00 AM
+
+You: "This afternoon 2h meeting"
+# "afternoon" = 2:00 PM
+
+You: "Last night I finished the deployment, about 1h"
+# "evening" = 6:00 PM
+```
+
+**Mappings:**
+- **morning** → 9:00 AM
+- **afternoon** → 2:00 PM
+- **evening** → 6:00 PM
+
+### Flexible Date Parsing
+
+Beyond the standard date formats, several natural language patterns are supported:
+
+```
+You: "Tomorrow I have a 2h meeting planned"
+# Logs to tomorrow's date
+
+You: "Yesterday afternoon 3h on debugging"
+# Logs to yesterday at 2:00 PM
+
+You: "This morning 1h standup"
+# Logs to today at 9:00 AM
+```
+
+### Advanced Retroactive Entries
+
+Combine time and date parsing for precise retroactive entries:
+
+```
+You: "Yesterday at 14:30 I did 2h code review"
+# Specific date and time
+
+You: "2 hours ago I finished a 90 minute meeting"
+# Relative time reference
+
+You: "This morning at 9:15 I started with 45m of email"
+# Time of day + specific time
+```
+
+### Timezone Awareness
+
+When `DISPLAY_TIMEZONE_OFFSET` is configured, the system automatically converts times:
+
+**Scenario:** Server in UTC, Display timezone AEST (UTC+10)
+
+```
+Current UTC time: 05:00
+Display time: 15:00 (3pm AEST)
+
+You: "2h on development"
+# Logged at 15:00 AEST (displayed in your local timezone)
+```
+
+**Smart conversion:** Only converts when system timezone ≠ display timezone. Local use requires no configuration.
+
+### Multiple Tags in One Entry
+
+You can add multiple tags to categorize work across different dimensions:
+
+```
+You: "2h on security audit #development #security #compliance"
+# Tracked under all three tags
+
+You: "Client workshop 3h #meeting #training #sales"
+# Appears in meeting, training, and sales breakdowns
+```
+
+**Use case:** Track activities that span multiple categories without duplicate entries.
+
+### Unmapped Tags
+
+Tags don't need to map to commitments to be useful:
+
+```
+You: "2h exploring new framework #research #learning"
+# Counts toward total hours
+# Visible in tag breakdown
+# Doesn't trigger commitment warnings
+
+You: "1h open source contribution #oss #development"
+# #development counts toward commitment
+# #oss tracked for visibility only
+```
+
+**Benefit:** Track all activities while only enforcing limits on specific commitment categories.
