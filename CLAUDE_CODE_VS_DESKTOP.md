@@ -28,7 +28,7 @@ These are **independent** and require **separate configurations** for MCP server
       "env": {
         "TIME_TRACKING_DIR": "/Users/markwharton/Documents/time-tracking",
         "COMPANIES": "HeliMods,Stellantis",
-        "DEFAULT_COMPANY": "HeliMods",
+        "COMPANY_ABBREVIATIONS": "HeliMods:HM:helimods,Stellantis:STLA:stellantis",
         "DISPLAY_TIMEZONE_OFFSET": "10",
         "DISPLAY_TIMEZONE_STRING": "AEST"
       }

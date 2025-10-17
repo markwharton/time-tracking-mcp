@@ -18,8 +18,8 @@ mkdir -p "$TRACKING_DIR"
 
 # Get companies
 echo ""
-read -p "Enter company names (comma-separated) [helimods]: " COMPANIES
-COMPANIES=${COMPANIES:-helimods}
+read -p "Enter company names (comma-separated) [HeliMods]: " COMPANIES
+COMPANIES=${COMPANIES:-HeliMods}
 
 # Create company directories and configs
 IFS=',' read -ra COMPANY_ARRAY <<< "$COMPANIES"
@@ -63,12 +63,6 @@ EOF
     fi
 done
 
-# Get default company
-DEFAULT_COMPANY=$(echo "${COMPANY_ARRAY[0]}" | xargs)
-echo ""
-read -p "Default company? [$DEFAULT_COMPANY]: " USER_DEFAULT
-DEFAULT_COMPANY=${USER_DEFAULT:-$DEFAULT_COMPANY}
-
 # Get timezone
 echo ""
 read -p "Timezone offset from UTC (e.g., 10 for AEST, -5 for EST) [0]: " TZ_OFFSET
@@ -97,7 +91,6 @@ echo "         \"args\": [\"$(pwd)/dist/server.js\"],"
 echo '         "env": {'
 echo "           \"TIME_TRACKING_DIR\": \"$TRACKING_DIR\","
 echo "           \"COMPANIES\": \"$COMPANIES\","
-echo "           \"DEFAULT_COMPANY\": \"$DEFAULT_COMPANY\","
 echo "           \"DISPLAY_TIMEZONE_OFFSET\": \"$TZ_OFFSET\","
 echo "           \"DISPLAY_TIMEZONE_STRING\": \"$TZ_STRING\""
 echo '         }'

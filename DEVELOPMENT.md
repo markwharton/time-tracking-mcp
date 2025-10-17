@@ -216,8 +216,8 @@ Each company has its own directory:
 ~/Documents/time-tracking/
   company-name/
     config.json          # Company configuration
-    2025-week-42.md      # Time entries
-    2025-week-43.md
+    2025-W42.md          # Time entries
+    2025-W43.md
 ```
 
 ## Philosophy

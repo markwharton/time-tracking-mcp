@@ -27,11 +27,11 @@ npm run build
 ### 2. Set Up Time Tracking Directory
 
 ```bash
-mkdir -p ~/Documents/time-tracking/helimods
-mkdir -p ~/Documents/time-tracking/stellantis
+mkdir -p ~/Documents/time-tracking/HeliMods
+mkdir -p ~/Documents/time-tracking/Stellantis
 ```
 
-Create `~/Documents/time-tracking/helimods/config.json`:
+Create `~/Documents/time-tracking/HeliMods/config.json`:
 
 ```json
 {
@@ -74,8 +74,8 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
       "args": ["/path/to/time-tracking-mcp/dist/server.js"],
       "env": {
         "TIME_TRACKING_DIR": "/Users/you/Documents/time-tracking",
-        "COMPANIES": "helimods,stellantis",
-        "DEFAULT_COMPANY": "helimods"
+        "COMPANIES": "HeliMods,Stellantis",
+        "COMPANY_ABBREVIATIONS": "HeliMods:HM:helimods,Stellantis:STLA:stellantis"
       }
     }
   }
@@ -98,8 +98,8 @@ Edit `~/.config/claude-code/settings.json`:
       "args": ["/path/to/time-tracking-mcp/dist/server.js"],
       "env": {
         "TIME_TRACKING_DIR": "/Users/you/Documents/time-tracking",
-        "COMPANIES": "helimods,stellantis",
-        "DEFAULT_COMPANY": "helimods"
+        "COMPANIES": "HeliMods,Stellantis",
+        "COMPANY_ABBREVIATIONS": "HeliMods:HM:helimods,Stellantis:STLA:stellantis"
       }
     }
   }
@@ -152,20 +152,20 @@ MCP Tool: Validates and processes
   ↓
 Markdown Manager: Appends to weekly file
   ↓
-File: ~/Documents/time-tracking/company/2025-week-42.md
+File: ~/Documents/time-tracking/company/2025-W42.md
 ```
 
 ### File Structure
 
 ```
 ~/Documents/time-tracking/
-  helimods/
+  HeliMods/
     config.json
-    2025-week-42.md
-    2025-week-43.md
-  stellantis/
+    2025-W42.md
+    2025-W43.md
+  Stellantis/
     config.json
-    2025-week-42.md
+    2025-W42.md
 ```
 
 ### Week File Example
@@ -204,7 +204,7 @@ File: ~/Documents/time-tracking/company/2025-week-42.md
 |----------|-------------|---------|
 | `TIME_TRACKING_DIR` | Where to store markdown files | `~/Documents/time-tracking` |
 | `COMPANIES` | Comma-separated list of companies | `default` |
-| `DEFAULT_COMPANY` | Default company when not specified | First company in list |
+| `COMPANY_ABBREVIATIONS` | Company name abbreviations for quick entry (format: `Company:abbr1:abbr2,Company2:abbr3`) | None |
 | `DISPLAY_TIMEZONE_OFFSET` | Hours offset from UTC for display | `0` |
 | `DISPLAY_TIMEZONE_STRING` | Timezone name for display | `UTC` |
 | `FLEXIBLE_DURATION_PARSING` | Enable flexible duration parsing in markdown | `false` |
@@ -315,17 +315,17 @@ You: "stla 1h client meeting"       # Stellantis
 
 ### Suffix Pattern
 ```
-You: "2h on security review for helimods"
-You: "1h meeting for stellantis"
+You: "2h on security review for HeliMods"
+You: "1h meeting for Stellantis"
 ```
 
 ### Company-Specific Queries
 ```
-You: "Status for helimods"
-You: "Show me stellantis report"
+You: "Status for HeliMods"
+You: "Show me Stellantis report"
 ```
 
-Claude automatically uses your default company when none is specified.
+The first company in your `COMPANIES` list is used when none is specified.
 
 ## Natural Language Examples
 
@@ -344,7 +344,7 @@ Claude automatically uses your default company when none is specified.
 ### Getting Reports
 - "Show me this week's report"
 - "Generate last week's report"
-- "Weekly summary for stellantis"
+- "Weekly summary for Stellantis"
 
 ## Tools Available
 

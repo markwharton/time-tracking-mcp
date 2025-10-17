@@ -28,14 +28,6 @@ export class TimeTrackingEnvironment {
     }
 
     /**
-     * Get default company when not specified
-     * Default: first company in list
-     */
-    static get defaultCompany(): string {
-        return process.env.DEFAULT_COMPANY || this.companies[0];
-    }
-
-    /**
      * Get timezone display string (e.g., "AEST", "UTC", "PST")
      */
     static get displayTimezoneString(): string {
@@ -114,7 +106,7 @@ export class TimeTrackingEnvironment {
      * Get full path for a week's markdown file
      */
     static getWeekFilePath(company: string, year: number, week: number): string {
-        const filename = `${year}-week-${week.toString().padStart(2, '0')}.md`;
+        const filename = `${year}-W${week.toString().padStart(2, '0')}.md`;
         return join(this.getCompanyDir(company), filename);
     }
 }

@@ -84,17 +84,17 @@ You: "Stellantis 2h code review"       # Stellantis
 Specify company at the end with "for":
 
 ```
-You: "2h on security review for helimods"
-You: "1h meeting for stellantis"
+You: "2h on security review for HeliMods"
+You: "1h meeting for Stellantis"
 You: "Client call 90 minutes for HM"
 ```
 
 #### Company-Specific Queries
 ```
-You: "Status for helimods"
-You: "How many hours for stellantis this week?"
-You: "Show me helimods report"
-You: "Generate stellantis weekly report"
+You: "Status for HeliMods"
+You: "How many hours for Stellantis this week?"
+You: "Show me HeliMods report"
+You: "Generate Stellantis weekly report"
 ```
 
 ## Checking Status
@@ -198,8 +198,8 @@ You: "Show me week 2025-W42"
 ### Multi-Company Reports
 
 ```
-You: "Generate this week's report for helimods"
-You: "Last week's stellantis report"
+You: "Generate this week's report for HeliMods"
+You: "Last week's Stellantis report"
 ```
 
 ## Natural Language Patterns
@@ -287,7 +287,7 @@ If you need to edit an entry:
 2. **Replace entry:** Log the correct time, then manually remove the old entry
 3. **Delete entry:** Open the markdown file and delete the line
 
-Files are located at: `~/Documents/time-tracking/{company}/2025-week-{N}.md`
+Files are located at: `~/Documents/time-tracking/{company}/2025-W{N}.md`
 
 ### Flexible Duration Parsing
 
@@ -344,10 +344,10 @@ You: "stla 3h on integration testing"
 Claude: "✓ Logged to Stellantis: 3h for integration testing..."
 
 Evening (5:00 PM):
-You: "Status for helimods"
+You: "Status for HeliMods"
 Claude: "HeliMods Week 42: 10.6h / 25h (42%)"
 
-You: "Status for stellantis"
+You: "Status for Stellantis"
 Claude: "Stellantis Week 42: 28.8h / 25h (115%) 🚫 OVER"
 ```
 
