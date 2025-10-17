@@ -414,6 +414,18 @@ Update `DISPLAY_TIMEZONE_OFFSET` in your Claude config.
 - Use full absolute paths in configuration
 - Check file permissions
 
+### Changes not taking effect after rebuild
+
+If you've modified and rebuilt the MCP server (`npm run build`) but Claude still exhibits old behavior:
+
+1. **Restart Claude completely**
+   - **Claude Desktop**: Quit the app (Cmd+Q), then relaunch
+   - **Claude Code CLI**: Exit the session (Ctrl+C), then run `claude` again
+
+2. **Why this happens**: MCP servers run as separate processes. When you rebuild, the compiled JavaScript in `dist/` updates, but Claude is still running the old cached version until you restart.
+
+3. **After restart**: Changes will take effect immediately. You can verify by checking that new behavior works as expected.
+
 ## Versioning
 
 This project uses [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for semantic versioning.
