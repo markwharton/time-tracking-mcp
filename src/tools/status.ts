@@ -3,7 +3,7 @@ import { registerTool } from './registry.js';
 import { MarkdownManager } from '../services/markdown-manager.js';
 import { getISOWeek, now } from '../utils/date-utils.js';
 import { createTextResponse, withErrorHandler } from '../utils/tool-response.js';
-import { TimeTrackingEnvironment } from '../config/environment.js';
+import { getCompanyForOperation } from '../utils/company-resolver.js';
 import type { StatusInput } from '../types/index.js';
 
 const markdownManager = new MarkdownManager();
@@ -36,7 +36,8 @@ Returns a brief summary of the current week's time.`,
         openWorldHint: false
     },
     handler: withErrorHandler('checking status', async (args: StatusInput) => {
-        const company = args.company || TimeTrackingEnvironment.defaultCompany;
+        // Resolve company (single-company mode auto-selects, multi-company requires explicit)
+        const company = getCompanyForOperation(args.company);
         const currentDate = now();
         const { year, week } = getISOWeek(currentDate);
 

@@ -70,6 +70,33 @@ export class TimeTrackingEnvironment {
     }
 
     /**
+     * Get company abbreviations mapping
+     * Format: "CompanyName:abbrev1:abbrev2,Company2:abbrev3"
+     * Returns: { "CompanyName": ["abbrev1", "abbrev2"], "Company2": ["abbrev3"] }
+     */
+    static getCompanyAbbreviations(): Record<string, string[]> {
+        const abbrevString = process.env.COMPANY_ABBREVIATIONS;
+        if (!abbrevString) {
+            return {};
+        }
+
+        const result: Record<string, string[]> = {};
+
+        // Parse "CompanyName:abbrev1:abbrev2,Company2:abbrev3"
+        const companyParts = abbrevString.split(',');
+        for (const part of companyParts) {
+            const tokens = part.split(':').map(t => t.trim()).filter(t => t);
+            if (tokens.length < 1) continue;
+
+            const company = tokens[0];
+            const abbreviations = tokens.slice(1);
+            result[company] = abbreviations;
+        }
+
+        return result;
+    }
+
+    /**
      * Get full path for a company's directory
      */
     static getCompanyDir(company: string): string {

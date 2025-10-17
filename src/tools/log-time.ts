@@ -4,7 +4,7 @@ import { MarkdownManager } from '../services/markdown-manager.js';
 import { parseDuration } from '../services/duration-parser.js';
 import { parseDate, parseTime, formatDate, formatTime, getISOWeek } from '../utils/date-utils.js';
 import { createTextResponse, withErrorHandler } from '../utils/tool-response.js';
-import { TimeTrackingEnvironment } from '../config/environment.js';
+import { getCompanyForOperation } from '../utils/company-resolver.js';
 import type { LogTimeInput, TimeEntry } from '../types/index.js';
 
 const markdownManager = new MarkdownManager();
@@ -14,9 +14,10 @@ registerTool({
     description: `Log a completed time entry. This tool records work you've done.
 
 Natural language examples Claude should parse:
-- "2h on security review" → task: "security review", duration: "2h"
+- Single company mode: "2h on security review" → task: "security review", duration: "2h"
+- Multi company mode: "hm 2h on security review" → company: "HeliMods", duration: "2h", task: "security review"
+- Multi company mode: "2h debugging for stellantis" → duration: "2h", task: "debugging", company: "Stellantis"
 - "Client meeting yesterday 90 minutes" → task: "Client meeting", duration: "90m", date: "yesterday"
-- "Just finished 1.5h on code review" → task: "code review", duration: "1.5h"
 
 Claude should extract:
 - task: What was worked on
@@ -24,7 +25,12 @@ Claude should extract:
 - time: When (optional, defaults to now)
 - date: Which day (optional, defaults to today)
 - tags: Inferred or explicit tags
-- company: Which company (optional, uses default)`,
+- company: CRITICAL - In multi-company mode, MUST extract from user input using:
+  * Prefix pattern: "company/abbrev [duration] [task]" (e.g., "hm 2h debugging", "stellantis 1h meeting")
+  * Suffix pattern: "[duration] [task] for company/abbrev" (e.g., "2h debugging for hm", "1h meeting for stellantis")
+  * Full company names work (case-insensitive): "HeliMods", "Stellantis", etc.
+  * Abbreviations work (case-insensitive): "HM", "STLA", etc.
+  * In single-company mode, company is automatic (ignore any company in input)`,
     inputSchema: {
         type: 'object',
         properties: {
@@ -64,8 +70,11 @@ Claude should extract:
         openWorldHint: false
     },
     handler: withErrorHandler('logging time', async (args: LogTimeInput) => {
+        // Resolve company (single-company mode auto-selects, multi-company requires explicit)
+        const userInput = `${args.task || ''} ${args.duration || ''}`.trim();
+        const company = getCompanyForOperation(args.company, userInput);
+
         // Parse inputs
-        const company = args.company || TimeTrackingEnvironment.defaultCompany;
         const duration = parseDuration(args.duration);
         const date = parseDate(args.date);
         const time = parseTime(args.time, date);

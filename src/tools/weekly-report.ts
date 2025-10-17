@@ -3,7 +3,7 @@ import { registerTool } from './registry.js';
 import { MarkdownManager } from '../services/markdown-manager.js';
 import { getISOWeek, now, getDayName, formatWeekHeader, getWeekBounds } from '../utils/date-utils.js';
 import { createTextResponse, withErrorHandler } from '../utils/tool-response.js';
-import { TimeTrackingEnvironment } from '../config/environment.js';
+import { getCompanyForOperation } from '../utils/company-resolver.js';
 import type { WeeklyReportInput } from '../types/index.js';
 
 const markdownManager = new MarkdownManager();
@@ -41,7 +41,8 @@ Returns a complete weekly report with all entries organized by day.`,
         openWorldHint: false
     },
     handler: withErrorHandler('generating weekly report', async (args: WeeklyReportInput) => {
-        const company = args.company || TimeTrackingEnvironment.defaultCompany;
+        // Resolve company (single-company mode auto-selects, multi-company requires explicit)
+        const company = getCompanyForOperation(args.company);
         const currentDate = now();
         let { year, week } = getISOWeek(currentDate);
 
