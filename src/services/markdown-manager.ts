@@ -205,13 +205,28 @@ export class MarkdownManager {
 
         let summaryText = '## Summary\n';
 
-        // Total hours
+        // Total hours with overflow detection
         const totalLimit = config.commitments.total?.limit || 0;
+        const totalMax = config.commitments.total?.max;
         const totalPercent = totalLimit > 0 ? Math.round((summary.totalHours / totalLimit) * 100) : 0;
+
         summaryText += '- **Total:** ' + formatDuration(summary.totalHours);
         if (totalLimit > 0) {
             summaryText += ' / ' + totalLimit + 'h limit (' + totalPercent + '%)';
         }
+
+        // Add overflow warning if over limit but under max
+        if (totalMax && summary.totalHours > totalLimit && summary.totalHours <= totalMax) {
+            const overflow = summary.totalHours - totalLimit;
+            summaryText += ' ⚠️ OVERFLOW (' + formatDuration(overflow) + ' into ' + totalMax + 'h max buffer)';
+        }
+
+        // Add danger warning if over max
+        if (totalMax && summary.totalHours > totalMax) {
+            const over = summary.totalHours - totalMax;
+            summaryText += ' 🚨 EXCEEDED MAX (' + formatDuration(over) + ' over ' + totalMax + 'h maximum)';
+        }
+
         summaryText += '\n';
 
         // Commitment breakdown

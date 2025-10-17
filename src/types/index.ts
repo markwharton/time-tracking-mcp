@@ -47,6 +47,7 @@ export interface CompanyConfig {
 
 export interface CommitmentLimit {
     limit: number;
+    max?: number;           // Optional hard maximum (for overflow tracking)
     unit: string;           // "hours/week"
 }
 
