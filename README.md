@@ -248,10 +248,10 @@ Each company directory should have a `config.json`:
 {
   "company": "Company Name",
   "commitments": {
-    "development": { "limit": 20, "unit": "hours/week" },
+    "development": { "limit": 15, "unit": "hours/week" },
     "meeting": { "limit": 5, "unit": "hours/week" },
     "admin": { "limit": 3, "unit": "hours/week" },
-    "total": { "limit": 25, "unit": "hours/week" }
+    "total": { "limit": 23, "max": 30, "unit": "hours/week" }
   },
   "projects": {
     "Project Name": {
@@ -269,8 +269,13 @@ Each company directory should have a `config.json`:
 **Configuration options:**
 
 - **commitments**: Define hour limits per category
-  - Each commitment has a `limit` (number) and `unit` (typically "hours/week")
-  - Special `total` commitment tracks all hours
+  - **`limit`**: Your target weekly hours for this commitment (e.g., 23h/week)
+  - **`max`** (optional): Hard maximum hours for overflow tracking (e.g., 30h buffer)
+    - Shows ⚠️ OVERFLOW when between `limit` and `max`
+    - Shows 🚨 EXCEEDED MAX when over `max`
+    - Useful for tracking occasional overages without constant warnings
+  - **`unit`**: Typically "hours/week"
+  - **`total`** commitment: Should equal the sum of other commitment limits (e.g., 15 + 5 + 3 = 23)
 
 - **projects**: Group related work
   - Automatically categorized by tags
@@ -325,7 +330,13 @@ You: "Status for HeliMods"
 You: "Show me Stellantis report"
 ```
 
-The first company in your `COMPANIES` list is used when none is specified.
+### Default Company Behavior
+
+**When company is clear from input:** Uses the specified company (via prefix, suffix, or explicit mention)
+
+**When company is ambiguous:** For safety, Claude will **prompt you** to clarify which company you mean rather than automatically defaulting. This prevents accidentally logging time to the wrong company.
+
+**First company as fallback:** The first company in your `COMPANIES` list is used only when the intent is genuinely unclear and you don't specify otherwise. However, Claude is designed to ask rather than assume.
 
 ## Natural Language Examples
 
