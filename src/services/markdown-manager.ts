@@ -2,7 +2,7 @@
 import { TimeTrackingEnvironment } from '../config/environment.js';
 import { readFileIfExists, writeFileSafe, readJSON } from '../utils/file-utils.js';
 import { formatDate, formatWeekHeader, getDayName, getWeekBounds, getISOWeek } from '../utils/date-utils.js';
-import { formatDuration } from './duration-parser.js';
+import { formatDuration, parseDuration } from './duration-parser.js';
 import type { TimeEntry, DailySummary, WeeklySummary, CompanyConfig } from '../types/index.js';
 
 export class MarkdownManager {
@@ -70,6 +70,11 @@ export class MarkdownManager {
         const summary = await this.calculateWeeklySummary(company, year, week, content);
         content = this.updateSummaryInContent(content, summary);
         content = this.updateDayTotalsInContent(content, summary);
+
+        // Normalize entry durations to standard format if flexible parsing is enabled
+        if (TimeTrackingEnvironment.flexibleDurationParsing) {
+            content = this.normalizeEntryDurations(content);
+        }
 
         await writeFileSafe(filePath, content);
     }
@@ -175,7 +180,33 @@ export class MarkdownManager {
                 continue;
             }
 
-            // Parse entry lines: - HH:MM Task (Xh) #tag1 #tag2
+            // Try flexible parsing first (if enabled)
+            if (TimeTrackingEnvironment.flexibleDurationParsing) {
+                const flexMatch = line.match(/^- (\d{2}:\d{2}) (.+?) \((.+?)\)(.*)?$/);
+                if (flexMatch && currentDate) {
+                    const [, time, task, durationStr, tagsStr] = flexMatch;
+
+                    try {
+                        const { hours } = parseDuration(durationStr);
+                        const tags = tagsStr ?
+                            tagsStr.match(/#\w+/g)?.map(t => t.substring(1)) || [] :
+                            [];
+
+                        entries.push({
+                            time,
+                            task,
+                            duration: hours,
+                            tags,
+                            date: currentDate
+                        });
+                        continue;
+                    } catch (e) {
+                        // Fall through to strict parsing or skip
+                    }
+                }
+            }
+
+            // Strict parsing: - HH:MM Task (Xh) #tag1 #tag2
             const entryMatch = line.match(/^- (\d{2}:\d{2}) (.+?) \((\d+(?:\.\d+)?)h\)(.*)?$/);
             if (entryMatch && currentDate) {
                 const [, time, task, duration, tagsStr] = entryMatch;
@@ -279,6 +310,34 @@ export class MarkdownManager {
         }
 
         return updatedContent;
+    }
+
+    /**
+     * Normalize entry durations to standard format (Xh)
+     * Converts entries like "- 06:01 task (30m)" to "- 06:01 task (0.5h)"
+     */
+    private normalizeEntryDurations(content: string): string {
+        const lines = content.split('\n');
+        const normalizedLines: string[] = [];
+
+        for (const line of lines) {
+            // Try to match entry with any duration format
+            const match = line.match(/^(- \d{2}:\d{2} .+? )\((.+?)\)(.*)$/);
+            if (match) {
+                const [, prefix, durationStr, suffix] = match;
+                try {
+                    const { hours } = parseDuration(durationStr);
+                    // Rewrite in standard format
+                    normalizedLines.push(prefix + '(' + formatDuration(hours) + ')' + suffix);
+                    continue;
+                } catch (e) {
+                    // Keep original if parsing fails
+                }
+            }
+            normalizedLines.push(line);
+        }
+
+        return normalizedLines.join('\n');
     }
 
     private cachedConfig: CompanyConfig | null = null;

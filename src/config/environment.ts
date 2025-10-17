@@ -59,6 +59,17 @@ export class TimeTrackingEnvironment {
     }
 
     /**
+     * Enable flexible duration parsing in markdown files
+     * When enabled, allows entries like "- 06:01 task (30m)" or "- 06:01 task (2 hours)"
+     * which are normalized to standard format on next recalculation
+     * Default: false (strict parsing for safety)
+     */
+    static get flexibleDurationParsing(): boolean {
+        const value = process.env.FLEXIBLE_DURATION_PARSING;
+        return value === 'true' || value === '1';
+    }
+
+    /**
      * Get full path for a company's directory
      */
     static getCompanyDir(company: string): string {

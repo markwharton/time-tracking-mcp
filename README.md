@@ -169,6 +169,38 @@ You never call these directly - just talk to Claude naturally!
 - `DEFAULT_COMPANY` - Default company when not specified (default: first company)
 - `DISPLAY_TIMEZONE_OFFSET` - Hours offset from UTC (default: `0`)
 - `DISPLAY_TIMEZONE_STRING` - Timezone display name (default: `UTC`)
+- `FLEXIBLE_DURATION_PARSING` - Enable flexible duration parsing in markdown files (default: `false`)
+
+#### Flexible Duration Parsing (Experimental)
+
+When `FLEXIBLE_DURATION_PARSING=true`, the markdown parser accepts multiple duration formats:
+
+**Supported formats:**
+- Standard: `(2h)`, `(2.5h)`
+- Minutes: `(30m)`, `(90 minutes)`
+- Natural: `(2 hours)`, `(half an hour)`
+
+**How it works:**
+1. Manual edits can use any format: `- 06:01 debugging (30m) #development`
+2. On next recalculation, entries normalize to standard format: `- 06:01 debugging (0.5h) #development`
+3. Invalid durations are silently ignored (treated as comments)
+
+**To enable:**
+```json
+{
+  "mcpServers": {
+    "TimeTracking": {
+      "command": "/path/to/node",
+      "args": ["/path/to/time-tracking-mcp/dist/server.js"],
+      "env": {
+        "FLEXIBLE_DURATION_PARSING": "true"
+      }
+    }
+  }
+}
+```
+
+**Safety:** When disabled (default), only strict format `(Xh)` is parsed, providing protection against accidental format corruption.
 
 ### Company Config (config.json)
 
