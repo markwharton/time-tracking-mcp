@@ -195,6 +195,13 @@ export class MarkdownManager {
             const line = lines[i];
             const lineNumber = i + 1;
 
+            // Detect date headers FIRST (before skipping headers): ## 2025-10-17 Thursday
+            const dateMatch = line.match(/^## (\d{4}-\d{2}-\d{2})/);
+            if (dateMatch) {
+                currentDate = dateMatch[1];
+                continue;
+            }
+
             // Skip empty lines, headers, summary sections, and comment lines
             if (!line.trim() ||
                 line.startsWith('#') ||
@@ -202,13 +209,6 @@ export class MarkdownManager {
                 line.startsWith('<!--') ||
                 line.startsWith('**') ||
                 line.startsWith('•')) {
-                continue;
-            }
-
-            // Detect date headers: ## 2025-10-17 Thursday
-            const dateMatch = line.match(/^## (\d{4}-\d{2}-\d{2})/);
-            if (dateMatch) {
-                currentDate = dateMatch[1];
                 continue;
             }
 
