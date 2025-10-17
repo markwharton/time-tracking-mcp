@@ -3,9 +3,11 @@ import { TimeTrackingEnvironment } from '../config/environment.js';
 import { readFileIfExists, writeFileSafe, readJSON } from '../utils/file-utils.js';
 import { formatDate, formatWeekHeader, getDayName, getWeekBounds, getISOWeek } from '../utils/date-utils.js';
 import { formatDuration, parseDuration } from './duration-parser.js';
+import { SummaryCalculator } from './summary-calculator.js';
 import type { TimeEntry, DailySummary, WeeklySummary, CompanyConfig } from '../types/index.js';
 
 export class MarkdownManager {
+    private summaryCalculator = new SummaryCalculator();
     /**
      * Load company configuration
      */
@@ -105,6 +107,7 @@ export class MarkdownManager {
 
     /**
      * Calculate weekly summary from markdown content
+     * Delegates to SummaryCalculator to avoid duplication
      */
     private async calculateWeeklySummary(
         company: string,
@@ -116,12 +119,10 @@ export class MarkdownManager {
         const entries = this.parseEntries(content);
         const weekBounds = getWeekBounds(year, week);
 
-        const days: DailySummary[] = [];
-        const byCommitment: Record<string, number> = {};
-        const byTag: Record<string, number> = {};
-        const byProject: Record<string, number> = {};
+        // Cache config for updateSummaryInContent
+        this.cachedConfig = config;
 
-        // Group entries by date
+        // Group entries by date to build daily summaries
         const entriesByDate = new Map<string, TimeEntry[]>();
         for (const entry of entries) {
             if (!entriesByDate.has(entry.date)) {
@@ -131,37 +132,20 @@ export class MarkdownManager {
         }
 
         // Build daily summaries
+        const days: DailySummary[] = [];
         for (const [date, dayEntries] of entriesByDate) {
-            const totalHours = dayEntries.reduce((sum, e) => sum + e.duration, 0);
-            days.push({ date, entries: dayEntries, totalHours });
-
-            // Aggregate by tags and commitments
-            for (const entry of dayEntries) {
-                for (const tag of entry.tags) {
-                    byTag[tag] = (byTag[tag] || 0) + entry.duration;
-
-                    // Map tag to commitment
-                    const commitment = this.getCommitmentForTag(config, tag);
-                    if (commitment) {
-                        byCommitment[commitment] = (byCommitment[commitment] || 0) + entry.duration;
-                    }
-                }
-            }
+            days.push(this.summaryCalculator.calculateDaily(date, dayEntries));
         }
 
-        const totalHours = entries.reduce((sum, e) => sum + e.duration, 0);
-
-        return {
-            weekNumber: week,
+        // Use SummaryCalculator for weekly aggregation (DRY - single source of truth)
+        return this.summaryCalculator.calculateWeekly(
+            week,
             year,
-            startDate: formatDate(weekBounds.startDate),
-            endDate: formatDate(weekBounds.endDate),
+            formatDate(weekBounds.startDate),
+            formatDate(weekBounds.endDate),
             days,
-            totalHours,
-            byCommitment,
-            byTag,
-            byProject
-        };
+            config
+        );
     }
 
     /**
@@ -341,33 +325,6 @@ export class MarkdownManager {
     }
 
     private cachedConfig: CompanyConfig | null = null;
-
-    /**
-     * Get commitment category for a tag
-     */
-    private getCommitmentForTag(config: CompanyConfig, tag: string): string | null {
-        // Cache config for updateSummaryInContent
-        this.cachedConfig = config;
-
-        // Check tag mappings first
-        const mappedTag = config.tagMappings?.[tag] || tag;
-
-        // Check if tag directly matches a commitment
-        if (config.commitments[mappedTag]) {
-            return mappedTag;
-        }
-
-        // Check projects
-        if (config.projects) {
-            for (const [, projectConfig] of Object.entries(config.projects)) {
-                if (projectConfig.tags.includes(mappedTag)) {
-                    return projectConfig.commitment;
-                }
-            }
-        }
-
-        return null;
-    }
 
     /**
      * Read weekly summary from file
