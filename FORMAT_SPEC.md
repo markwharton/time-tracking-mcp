@@ -118,7 +118,7 @@ Day sections group entries by date in reverse chronological order (most recent f
 1. **Bullet:** `-` (hyphen + space)
 2. **Time:** `HH:MM` in 24-hour format
 3. **Space:** Single space separator
-4. **Task:** Free-form text description (non-greedy match until duration)
+4. **Task:** Free-form text description (greedy match, supports parentheses in task names)
 5. **Space:** Single space separator
 6. **Duration:** `(Xh)` or `(X.Yh)` in parentheses
    - Must be hours with optional decimal
@@ -154,26 +154,30 @@ All flexible formats are automatically converted to standard `(Xh)` format on ne
 ### Strict Parsing (Default)
 
 ```regex
-^- (\d{2}:\d{2}) (.+?) \((\d+(?:\.\d+)?)h\)(.*)?$
+^- (\d{2}:\d{2}) (.+) \((\d+(?:\.\d+)?)h\)(.*)?$
 ```
 
 **Captures:**
 1. Time: `HH:MM`
-2. Task: Non-greedy text
+2. Task: Greedy text (backtracks to find last duration match, supports parentheses in task)
 3. Duration: Decimal hours
 4. Tags: Remaining text (parsed for `#\w+`)
+
+**Note:** The greedy `.+` allows task names to contain parentheses (e.g., `"debugging (part 1)"`). The regex engine backtracks to find the last occurrence of the duration pattern.
 
 ### Flexible Parsing (Optional)
 
 ```regex
-^- (\d{2}:\d{2}) (.+?) \((.+?)\)(.*)?$
+^- (\d{2}:\d{2}) (.+) \((.+?)\)(.*)?$
 ```
 
 **Captures:**
 1. Time: `HH:MM`
-2. Task: Non-greedy text
+2. Task: Greedy text (backtracks to find last duration match, supports parentheses in task)
 3. Duration: Any text (passed to duration parser)
 4. Tags: Remaining text
+
+**Note:** Same greedy matching as strict parsing, but duration can be any parseable format.
 
 ## Tag System
 
