@@ -12,6 +12,12 @@ export class MarkdownManager {
     private static readonly CURRENT_FORMAT_VERSION = 'v1.0';
     private parseIssues: ParseIssues = { unparsedLines: [], formatVersion: null, warnings: [] };
 
+    // Entry parsing patterns (DRY - single source of truth)
+    // Use greedy matching (.+) to handle task descriptions containing parentheses like "(1h)"
+    private static readonly ENTRY_PATTERN_FLEXIBLE = /^- (\d{2}:\d{2}) (.+) \((.+?)\)(.*)?$/;
+    private static readonly ENTRY_PATTERN_STRICT = /^- (\d{2}:\d{2}) (.+) \((\d+(?:\.\d+)?)h\)(.*)?$/;
+    private static readonly ENTRY_PATTERN_NORMALIZE = /^(- \d{2}:\d{2} .+) \((.+?)\)(.*)$/;
+
     /**
      * Detect format version from markdown content
      */
@@ -221,7 +227,7 @@ export class MarkdownManager {
 
             // Try flexible parsing first (if enabled)
             if (TimeTrackingEnvironment.flexibleDurationParsing) {
-                const flexMatch = line.match(/^- (\d{2}:\d{2}) (.+) \((.+?)\)(.*)?$/);
+                const flexMatch = line.match(MarkdownManager.ENTRY_PATTERN_FLEXIBLE);
                 if (flexMatch && currentDate) {
                     const [, time, task, durationStr, tagsStr] = flexMatch;
 
@@ -247,7 +253,7 @@ export class MarkdownManager {
 
             // Strict parsing: - HH:MM Task (Xh) #tag1 #tag2
             if (!parsed) {
-                const entryMatch = line.match(/^- (\d{2}:\d{2}) (.+) \((\d+(?:\.\d+)?)h\)(.*)?$/);
+                const entryMatch = line.match(MarkdownManager.ENTRY_PATTERN_STRICT);
                 if (entryMatch && currentDate) {
                     const [, time, task, duration, tagsStr] = entryMatch;
                     const tags = tagsStr ?
@@ -384,7 +390,7 @@ export class MarkdownManager {
 
         for (const line of lines) {
             // Try to match entry with any duration format
-            const match = line.match(/^(- \d{2}:\d{2} .+) \((.+?)\)(.*)$/);
+            const match = line.match(MarkdownManager.ENTRY_PATTERN_NORMALIZE);
             if (match) {
                 const [, prefix, durationStr, suffix] = match;
                 try {
