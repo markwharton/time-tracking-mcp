@@ -22,18 +22,30 @@ export function formatTime(date: Date): string {
 }
 
 /**
- * Apply timezone offset to UTC date
+ * Apply timezone offset to convert from server time to display timezone
+ * Only applies offset if server timezone differs from configured display timezone
+ *
+ * Examples:
+ * - Server in AEST (UTC+10), Display=AEST (UTC+10): No conversion (local use)
+ * - Server in UTC (UTC+0), Display=AEST (UTC+10): Add 10 hours (cloud server use)
  */
-export function applyTimezoneOffset(utcDate: Date): Date {
-    if (TimeTrackingEnvironment.isUTC) {
-        return utcDate;
+export function applyTimezoneOffset(date: Date): Date {
+    // Get system's timezone offset in hours (negative of getTimezoneOffset/60)
+    const systemOffsetHours = date.getTimezoneOffset() / -60;
+    const displayOffsetHours = TimeTrackingEnvironment.displayTimezoneOffset;
+
+    // If system timezone matches display timezone, no conversion needed
+    if (systemOffsetHours === displayOffsetHours) {
+        return date;
     }
-    const offset = TimeTrackingEnvironment.displayTimezoneOffset;
-    return new Date(utcDate.getTime() + (offset * 60 * 60 * 1000));
+
+    // Calculate difference and apply conversion
+    const offsetDiff = displayOffsetHours - systemOffsetHours;
+    return new Date(date.getTime() + (offsetDiff * 60 * 60 * 1000));
 }
 
 /**
- * Get current date/time in configured timezone
+ * Get current date/time in configured display timezone
  */
 export function now(): Date {
     return applyTimezoneOffset(new Date());
