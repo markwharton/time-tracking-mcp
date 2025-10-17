@@ -1,6 +1,6 @@
 {
   "name": "time-tracking-mcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Model Context Protocol (MCP) server for natural language time tracking",
   "type": "module",
   "main": "dist/server.js",

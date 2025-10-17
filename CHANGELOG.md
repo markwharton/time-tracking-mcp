@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.1.2](https://github.com/markwharton/time-tracking-mcp/compare/v0.1.1...v0.1.2) (2025-10-17)
+
+
+### Bug Fixes
+
+* preserve space before duration in normalizeEntryDurations ([4c21167](https://github.com/markwharton/time-tracking-mcp/commit/4c21167212ce53be8e55c178dbe77a5762d2f9d4))
+
 ## 0.1.1 (2025-10-17)
 
 
