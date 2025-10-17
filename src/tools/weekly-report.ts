@@ -2,7 +2,7 @@
 import { registerTool } from './registry.js';
 import { MarkdownManager } from '../services/markdown-manager.js';
 import { getISOWeek, now, getDayName, formatWeekHeader, getWeekBounds } from '../utils/date-utils.js';
-import { createTextResponse, withErrorHandler } from '../utils/tool-response.js';
+import { createTextResponse, withErrorHandler, MULTI_COMPANY_GUIDANCE } from '../utils/tool-response.js';
 import { getCompanyForOperation } from '../utils/company-resolver.js';
 import { formatProjectBreakdown, formatTagBreakdown } from '../utils/report-formatters.js';
 import type { WeeklyReportInput } from '../types/index.js';
@@ -19,7 +19,7 @@ Natural language examples Claude should handle:
 - "What did I work on this week?"
 - "Last week's report"
 
-Returns a complete weekly report with all entries organized by day.`,
+Returns a complete weekly report with all entries organized by day.${MULTI_COMPANY_GUIDANCE}`,
     inputSchema: {
         type: 'object',
         properties: {

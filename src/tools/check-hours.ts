@@ -2,7 +2,7 @@
 import { registerTool } from './registry.js';
 import { MarkdownManager } from '../services/markdown-manager.js';
 import { getISOWeek, now, formatDate, getDayName } from '../utils/date-utils.js';
-import { createTextResponse, withErrorHandler } from '../utils/tool-response.js';
+import { createTextResponse, withErrorHandler, MULTI_COMPANY_GUIDANCE } from '../utils/tool-response.js';
 import { getCompanyForOperation } from '../utils/company-resolver.js';
 import { formatProjectBreakdown, formatTagBreakdown } from '../utils/report-formatters.js';
 import type { CheckHoursInput } from '../types/index.js';
@@ -18,7 +18,7 @@ Natural language examples Claude should handle:
 - "Show me this week's breakdown"
 - "What did I work on today?"
 
-Returns detailed breakdown of time by tags and projects.`,
+Returns detailed breakdown of time by tags and projects.${MULTI_COMPANY_GUIDANCE}`,
     inputSchema: {
         type: 'object',
         properties: {

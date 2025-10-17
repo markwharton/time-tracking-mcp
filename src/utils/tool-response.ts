@@ -1,6 +1,16 @@
 // src/utils/tool-response.ts
 
 /**
+ * Standard guidance for multi-company mode interactions
+ * DRY: Single source of truth for company selection guidance
+ */
+export const MULTI_COMPANY_GUIDANCE = `
+
+**Multi-company mode**: When company is not specified and multiple companies are configured,
+Claude should use AskUserQuestion tool to present available companies as interactive options,
+including an option to show "Both companies" for comparison.`;
+
+/**
  * MCP tool response structure
  */
 export interface ToolResponse {

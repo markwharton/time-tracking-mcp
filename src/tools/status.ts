@@ -2,7 +2,7 @@
 import { registerTool } from './registry.js';
 import { MarkdownManager } from '../services/markdown-manager.js';
 import { getISOWeek, now } from '../utils/date-utils.js';
-import { createTextResponse, withErrorHandler } from '../utils/tool-response.js';
+import { createTextResponse, withErrorHandler, MULTI_COMPANY_GUIDANCE } from '../utils/tool-response.js';
 import { getCompanyForOperation } from '../utils/company-resolver.js';
 import type { StatusInput } from '../types/index.js';
 
@@ -18,7 +18,7 @@ Natural language examples Claude should handle:
 - "Am I over my hours?"
 - "How many hours this week?"
 
-Returns a brief summary of the current week's time.`,
+Returns a brief summary of the current week's time.${MULTI_COMPANY_GUIDANCE}`,
     inputSchema: {
         type: 'object',
         properties: {
