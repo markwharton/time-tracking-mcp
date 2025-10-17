@@ -120,3 +120,23 @@ When you add or modify code:
 - **src/types/** - TypeScript type definitions
 
 Keep tools thin - they should orchestrate, not implement. Heavy logic belongs in services or utils.
+
+## Markdown Formatting
+
+### Multi-line Bold/Italic Lists
+
+When creating lists with bold or italic text that should appear on separate lines, add **two spaces** at the end of each line to force a line break in Markdown.
+
+**Example (note the two spaces at end of lines 1 and 2):**
+```markdown
+**Last Updated:** 2025-10-15
+**Document Purpose:** Define standards
+**Owner:** Development Team
+```
+
+**Without double spaces**, these lines will run together in rendered Markdown. The spaces are invisible but critical for proper rendering.
+
+**When to use:**
+- Document headers with multiple metadata fields
+- Lists of properties or attributes that should stack vertically
+- Status indicators that should appear on separate lines

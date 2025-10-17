@@ -229,7 +229,7 @@ Claude understands various ways of expressing the same thing:
 
 ### Be Specific with Project Names
 
-✅ Good: "2h on Conduit MCP security review"
+✅ Good: "2h on Conduit MCP security review"  
 ❌ Vague: "2h on that thing"
 
 ### Use Consistent Tags
@@ -259,8 +259,8 @@ Do:
 
 Don't try to match a specific format. Just tell Claude what you did:
 
-✅ "Just wrapped up a 2 hour meeting with the client about Q4 planning"
-✅ "Been working on security review for about 90 minutes"
+✅ "Just wrapped up a 2 hour meeting with the client about Q4 planning"  
+✅ "Been working on security review for about 90 minutes"  
 ✅ "Yesterday I spent the afternoon (about 3 hours) on code review"
 
 ## Warning System
