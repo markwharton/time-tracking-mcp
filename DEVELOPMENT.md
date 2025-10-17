@@ -36,6 +36,89 @@ src/
     └── index.ts           # TypeScript interfaces
 ```
 
+### Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph "Entry Point"
+        SERVER[server.ts]
+    end
+
+    subgraph "Tools Layer - Thin Orchestration"
+        REGISTRY[registry.ts]
+        LOGTIME[log-time.ts]
+        STATUS[status.ts]
+        CHECK[check-hours.ts]
+        REPORT[weekly-report.ts]
+    end
+
+    subgraph "Services Layer - Business Logic"
+        MARKDOWN[markdown-manager.ts]
+        DURATION[duration-parser.ts]
+        SUMMARY[summary-calculator.ts]
+    end
+
+    subgraph "Utils Layer - Shared Helpers"
+        DATE[date-utils.ts]
+        FILE[file-utils.ts]
+        FORMAT[report-formatters.ts]
+    end
+
+    subgraph "Configuration & Types"
+        ENV[environment.ts]
+        TYPES[types/index.ts]
+    end
+
+    SERVER --> REGISTRY
+    REGISTRY --> LOGTIME
+    REGISTRY --> STATUS
+    REGISTRY --> CHECK
+    REGISTRY --> REPORT
+
+    LOGTIME --> MARKDOWN
+    STATUS --> MARKDOWN
+    CHECK --> MARKDOWN
+    REPORT --> MARKDOWN
+
+    MARKDOWN --> DURATION
+    MARKDOWN --> SUMMARY
+    MARKDOWN --> FILE
+
+    STATUS --> FORMAT
+    CHECK --> FORMAT
+    REPORT --> FORMAT
+
+    DURATION --> DATE
+    SUMMARY --> DATE
+    FORMAT --> DATE
+
+    LOGTIME --> ENV
+    MARKDOWN --> ENV
+
+    LOGTIME -.-> TYPES
+    STATUS -.-> TYPES
+    CHECK -.-> TYPES
+    REPORT -.-> TYPES
+    MARKDOWN -.-> TYPES
+    DURATION -.-> TYPES
+    SUMMARY -.-> TYPES
+
+    style SERVER fill:#e1f5ff
+    style REGISTRY fill:#fff4e1
+    style LOGTIME fill:#ffe1f5
+    style STATUS fill:#ffe1f5
+    style CHECK fill:#ffe1f5
+    style REPORT fill:#ffe1f5
+    style MARKDOWN fill:#e1ffe1
+    style DURATION fill:#e1ffe1
+    style SUMMARY fill:#e1ffe1
+    style DATE fill:#f5e1ff
+    style FILE fill:#f5e1ff
+    style FORMAT fill:#f5e1ff
+    style ENV fill:#fff9e1
+    style TYPES fill:#fff9e1
+```
+
 ## Key Design Decisions
 
 ### Markdown Storage
@@ -111,6 +194,45 @@ import './tools/my-new-tool.js';
 
 3. **Rebuild and test** in Claude Desktop
 
+### Tool Registration Lifecycle
+
+```mermaid
+flowchart TD
+    START([Create Tool File]) --> REG[Call registerTool with<br/>name, description, schema, handler]
+    REG --> STORE[Tool stored in<br/>toolRegistry Map]
+
+    IMPORT[server.ts imports tool file] --> EXEC[Tool file executes]
+    EXEC --> REG
+
+    SERVER[MCP Server starts] --> IMPORT
+    SERVER --> LISTEN[Listen for tool_list request]
+
+    LISTEN --> REQUEST{Tool List<br/>Request?}
+    REQUEST -->|Yes| GETALL[getAllTools returns<br/>all registered tools]
+    GETALL --> SEND[Send to Claude]
+
+    SEND --> DISCOVER[Claude discovers<br/>available tools]
+    DISCOVER --> INVOKE{User Request<br/>Matches Tool?}
+
+    INVOKE -->|Yes| CALL[Claude calls tool<br/>via call_tool request]
+    CALL --> LOOKUP[Look up handler<br/>in toolRegistry]
+    LOOKUP --> WRAP[withErrorHandler wrapper]
+    WRAP --> RUN[Execute tool handler]
+    RUN --> RESULT[Return response<br/>to Claude]
+    RESULT --> USER[Display to user]
+
+    INVOKE -->|No| WAIT[Wait for next request]
+    WAIT --> INVOKE
+
+    style START fill:#e1f5ff
+    style REG fill:#fff4e1
+    style STORE fill:#ffe1f5
+    style DISCOVER fill:#e1ffe1
+    style RUN fill:#f5e1ff
+    style RESULT fill:#fff9e1
+    style USER fill:#e1f5ff
+```
+
 ## Code Organization Principles
 
 ### Layer Responsibilities
@@ -175,18 +297,27 @@ This automatically:
 
 ## Data Flow
 
-```
-User (natural language)
-  ↓
-Claude (parses intent)
-  ↓
-Tool (validates parameters)
-  ↓
-Service (implements logic)
-  ↓
-Storage (markdown files)
-  ↓
-Response (formatted text)
+```mermaid
+flowchart LR
+    A[User<br/>natural language] --> B[Claude<br/>parses intent]
+    B --> C[Tool Layer<br/>validates parameters]
+    C --> D[Service Layer<br/>implements logic]
+    D --> E[Storage Layer<br/>markdown files]
+    E --> F[Response<br/>formatted text]
+    F --> A
+
+    subgraph "MCP Server Architecture"
+        C
+        D
+        E
+    end
+
+    style A fill:#e1f5ff,stroke:#333,stroke-width:2px
+    style B fill:#fff4e1,stroke:#333,stroke-width:2px
+    style C fill:#ffe1f5
+    style D fill:#e1ffe1
+    style E fill:#f5e1ff
+    style F fill:#e1f5ff,stroke:#333,stroke-width:2px
 ```
 
 ## Common Tasks

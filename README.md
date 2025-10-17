@@ -143,16 +143,22 @@ See [docs/usage-examples.md](docs/usage-examples.md) for more examples and advan
 
 ## How It Works
 
-```
-User: "2h on security review"
-  ↓
-Claude parses: {task: "security review", duration: "2h"}
-  ↓
-MCP Tool: Validates and processes
-  ↓
-Markdown Manager: Appends to weekly file
-  ↓
-File: ~/Documents/time-tracking/company/2025-W42.md
+```mermaid
+flowchart TD
+    A[User: '2h on security review'] --> B[Claude parses natural language]
+    B --> C{MCP Tool<br/>log_time}
+    C --> D[Validates parameters<br/>task, duration, time]
+    D --> E[Markdown Manager]
+    E --> F[Appends to weekly file]
+    F --> G[~/Documents/time-tracking/<br/>company/2025-W42.md]
+    G --> H[Recalculates summary]
+    H --> I[Returns status to user]
+
+    style A fill:#e1f5ff
+    style C fill:#fff4e1
+    style E fill:#ffe1f5
+    style G fill:#e1ffe1
+    style I fill:#e1f5ff
 ```
 
 ### File Structure
@@ -309,6 +315,54 @@ Result: 25h total, development at limit, meeting under limit, #learn visible in 
 ```
 
 This lets you track all your time while only enforcing limits on specific commitment categories.
+
+### Configuration Relationships
+
+```mermaid
+erDiagram
+    CONFIG ||--o{ COMMITMENT : defines
+    CONFIG ||--o{ PROJECT : contains
+    CONFIG ||--o{ TAG_MAPPING : has
+
+    PROJECT ||--o{ TAG : "auto-applies"
+    PROJECT ||--o| COMMITMENT : "maps to"
+
+    TIME_ENTRY ||--o{ TAG : tagged
+    TAG ||--o| COMMITMENT : "counts toward"
+
+    TIME_ENTRY }o--|| PROJECT : "grouped by"
+    TIME_ENTRY }o--|| COMMITMENT : "tracked against"
+
+    COMMITMENT {
+        string name "development, meeting, etc"
+        number limit "20h/week"
+        number max "optional hard limit"
+        string unit "hours/week"
+    }
+
+    PROJECT {
+        string name "Time Tracking MCP"
+        array tags "development, mcp"
+        string commitment "development"
+    }
+
+    TAG {
+        string name "development, meeting, learn"
+        boolean mapped "true if in commitment"
+    }
+
+    TAG_MAPPING {
+        string informal "dev, sync"
+        string formal "development, meeting"
+    }
+
+    TIME_ENTRY {
+        string task "security review"
+        number duration "2h"
+        datetime time "14:30"
+        array tags "development, security"
+    }
+```
 
 ## Multi-Company Usage
 

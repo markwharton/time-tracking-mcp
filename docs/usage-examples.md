@@ -354,6 +354,43 @@ You: "Status for Stellantis"
 Claude: "Stellantis Week 42: 28.8h / 25h (115%) 🚫 OVER"
 ```
 
+### Multi-Company Interaction Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant C as Claude
+    participant HM as HeliMods<br/>Storage
+    participant ST as Stellantis<br/>Storage
+
+    Note over U,ST: Morning Session
+    U->>C: "hm 2h on Time Tracking MCP"
+    C->>C: Parse: company=HeliMods, task, duration
+    C->>HM: Append time entry
+    HM-->>C: Updated summary
+    C->>U: "✓ Logged to HeliMods: 10.6h / 25h"
+
+    Note over U,ST: Afternoon Session
+    U->>C: "stla 3h on integration testing"
+    C->>C: Parse: company=Stellantis, task, duration
+    C->>ST: Append time entry
+    ST-->>C: Updated summary
+    C->>U: "✓ Logged to Stellantis: 28.8h / 25h"
+
+    Note over U,ST: Status Check
+    U->>C: "Status for HeliMods"
+    C->>HM: Read week file
+    HM-->>C: Calculate summary
+    C->>U: "HeliMods: 10.6h / 25h (42%)"
+
+    U->>C: "Status for Stellantis"
+    C->>ST: Read week file
+    ST-->>C: Calculate summary
+    C->>U: "Stellantis: 28.8h / 25h (115%) 🚫"
+
+    Note over U,ST: Independent tracking across companies
+```
+
 ## Project Tracking
 
 When you have projects configured, Claude automatically groups your time:
