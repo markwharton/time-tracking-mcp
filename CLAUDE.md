@@ -2,6 +2,17 @@
 
 This document provides guidance for Claude Code when working on this codebase.
 
+## Core Principles
+
+1. **Accuracy over speed** - Correct implementations are more important than fast implementations
+2. **Transparency** - Always disclose implementation decisions and tradeoffs
+3. **Ask, don't assume** - When in doubt, ask the user
+4. **No surprises** - The user should never discover shortcuts after the fact
+5. **Complete work** - Finish what you start; don't leave TODOs without permission
+6. **Investigate before fixing** - When debugging, always investigate to find the root cause before proposing changes. Use methodical analysis (reading code, testing hypotheses, examining actual data) to understand what's actually broken. Prefer minimal, surgical fixes that address the real problem over broad refactors or reversions. Jumping to "undo the last change" without understanding why something broke often misses the actual issue.
+7. **Clean breaks over backward compatibility** - During active development, prefer clean implementations over maintaining backward compatibility unless explicitly requested. This results in simpler code, less technical debt, and easier maintenance.
+8. **Test assumptions** - When you think you've found the problem, verify it with a minimal test case before proposing a fix. Don't assume correlation equals causation.
+
 ## DRY Principle (Don't Repeat Yourself)
 
 **Single Source of Truth**: Every piece of knowledge should have one authoritative representation in the system.
