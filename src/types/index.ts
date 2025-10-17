@@ -109,3 +109,12 @@ export interface WeekIdentifier {
     startDate: Date;
     endDate: Date;
 }
+
+/**
+ * Parse validation issues
+ */
+export interface ParseIssues {
+    unparsedLines: Array<{ lineNumber: number; content: string }>;
+    formatVersion: string | null;
+    warnings: string[];
+}

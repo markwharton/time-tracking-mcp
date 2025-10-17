@@ -4,10 +4,40 @@ import { readFileIfExists, writeFileSafe, readJSON } from '../utils/file-utils.j
 import { formatDate, formatWeekHeader, getDayName, getWeekBounds, getISOWeek } from '../utils/date-utils.js';
 import { formatDuration, parseDuration } from './duration-parser.js';
 import { SummaryCalculator } from './summary-calculator.js';
-import type { TimeEntry, DailySummary, WeeklySummary, CompanyConfig } from '../types/index.js';
+import { AuditLog } from './audit-log.js';
+import type { TimeEntry, DailySummary, WeeklySummary, CompanyConfig, ParseIssues } from '../types/index.js';
 
 export class MarkdownManager {
     private summaryCalculator = new SummaryCalculator();
+    private static readonly CURRENT_FORMAT_VERSION = 'v1.0';
+    private parseIssues: ParseIssues = { unparsedLines: [], formatVersion: null, warnings: [] };
+
+    /**
+     * Detect format version from markdown content
+     */
+    private detectFormatVersion(content: string): string | null {
+        const versionMatch = content.match(/<!-- time-tracking-format: (v[\d.]+) -->/);
+        return versionMatch ? versionMatch[1] : null;
+    }
+
+    /**
+     * Get parse issues from last parse operation
+     */
+    getParseIssues(): ParseIssues {
+        return this.parseIssues;
+    }
+
+    /**
+     * Reset parse issues
+     */
+    private resetParseIssues(content: string): void {
+        this.parseIssues = {
+            unparsedLines: [],
+            formatVersion: this.detectFormatVersion(content),
+            warnings: []
+        };
+    }
+
     /**
      * Load company configuration
      */
@@ -79,6 +109,9 @@ export class MarkdownManager {
         }
 
         await writeFileSafe(filePath, content);
+
+        // Log to audit log
+        await AuditLog.logAdd(company, entry);
     }
 
     /**
@@ -97,7 +130,8 @@ export class MarkdownManager {
         const weekBounds = getWeekBounds(year, week);
         const weekHeader = formatWeekHeader(weekBounds);
 
-        let content = '# Time Tracking - ' + config.company + ' - ' + weekHeader + '\n\n';
+        let content = '<!-- time-tracking-format: v1.0 -->\n';
+        content += '# Time Tracking - ' + config.company + ' - ' + weekHeader + '\n\n';
         content += '## Summary\n';
         content += '- **Total:** 0h\n\n';
         content += '---\n\n';
@@ -155,14 +189,35 @@ export class MarkdownManager {
         const entries: TimeEntry[] = [];
         const lines = content.split('\n');
         let currentDate = '';
+        this.resetParseIssues(content);
 
-        for (const line of lines) {
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const lineNumber = i + 1;
+
+            // Skip empty lines, headers, summary sections, and comment lines
+            if (!line.trim() ||
+                line.startsWith('#') ||
+                line.startsWith('---') ||
+                line.startsWith('<!--') ||
+                line.startsWith('**') ||
+                line.startsWith('•')) {
+                continue;
+            }
+
             // Detect date headers: ## 2025-10-17 Thursday
             const dateMatch = line.match(/^## (\d{4}-\d{2}-\d{2})/);
             if (dateMatch) {
                 currentDate = dateMatch[1];
                 continue;
             }
+
+            // Skip if not an entry line (doesn't start with '- ')
+            if (!line.startsWith('- ')) {
+                continue;
+            }
+
+            let parsed = false;
 
             // Try flexible parsing first (if enabled)
             if (TimeTrackingEnvironment.flexibleDurationParsing) {
@@ -183,29 +238,52 @@ export class MarkdownManager {
                             tags,
                             date: currentDate
                         });
-                        continue;
+                        parsed = true;
                     } catch (e) {
-                        // Fall through to strict parsing or skip
+                        // Fall through to strict parsing
                     }
                 }
             }
 
             // Strict parsing: - HH:MM Task (Xh) #tag1 #tag2
-            const entryMatch = line.match(/^- (\d{2}:\d{2}) (.+?) \((\d+(?:\.\d+)?)h\)(.*)?$/);
-            if (entryMatch && currentDate) {
-                const [, time, task, duration, tagsStr] = entryMatch;
-                const tags = tagsStr ?
-                    tagsStr.match(/#\w+/g)?.map(t => t.substring(1)) || [] :
-                    [];
+            if (!parsed) {
+                const entryMatch = line.match(/^- (\d{2}:\d{2}) (.+?) \((\d+(?:\.\d+)?)h\)(.*)?$/);
+                if (entryMatch && currentDate) {
+                    const [, time, task, duration, tagsStr] = entryMatch;
+                    const tags = tagsStr ?
+                        tagsStr.match(/#\w+/g)?.map(t => t.substring(1)) || [] :
+                        [];
 
-                entries.push({
-                    time,
-                    task,
-                    duration: parseFloat(duration),
-                    tags,
-                    date: currentDate
-                });
+                    entries.push({
+                        time,
+                        task,
+                        duration: parseFloat(duration),
+                        tags,
+                        date: currentDate
+                    });
+                    parsed = true;
+                }
             }
+
+            // Track unparsed entry lines
+            if (!parsed && currentDate) {
+                this.parseIssues.unparsedLines.push({ lineNumber, content: line });
+            }
+        }
+
+        // Add warnings
+        if (this.parseIssues.unparsedLines.length > 0) {
+            this.parseIssues.warnings.push(
+                `Found ${this.parseIssues.unparsedLines.length} unparsed entry line(s)`
+            );
+        }
+
+        if (this.parseIssues.formatVersion === null) {
+            this.parseIssues.warnings.push('No format version marker found (pre-v1.0 file)');
+        } else if (this.parseIssues.formatVersion !== MarkdownManager.CURRENT_FORMAT_VERSION) {
+            this.parseIssues.warnings.push(
+                `Format version ${this.parseIssues.formatVersion} differs from current ${MarkdownManager.CURRENT_FORMAT_VERSION}`
+            );
         }
 
         return entries;

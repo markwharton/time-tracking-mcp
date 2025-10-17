@@ -96,6 +96,9 @@ Claude should extract:
         const { year, week } = getISOWeek(date);
         const summary = await markdownManager.getWeeklySummary(company, year, week);
 
+        // Check for parse issues
+        const parseIssues = markdownManager.getParseIssues();
+
         // Build response
         let response = `✓ Logged ${duration.formatted} for "${args.task}" at ${entry.time}`;
 
@@ -135,6 +138,20 @@ Claude should extract:
                     const percent = Math.round((hours / limit) * 100);
                     const warning = percent > 100 ? ' ⚠️' : '';
                     response += `• ${commitment.charAt(0).toUpperCase() + commitment.slice(1)}: ${hours.toFixed(1)}h / ${limit}h (${percent}%)${warning}\n`;
+                }
+            }
+        }
+
+        // Add parse warnings if any
+        if (parseIssues.warnings.length > 0) {
+            response += '\n\n⚠️ **Parse Warnings:**\n';
+            for (const warning of parseIssues.warnings) {
+                response += `• ${warning}\n`;
+            }
+            if (parseIssues.unparsedLines.length > 0 && parseIssues.unparsedLines.length <= 3) {
+                response += '\nUnparsed lines:\n';
+                for (const { lineNumber, content } of parseIssues.unparsedLines) {
+                    response += `  Line ${lineNumber}: ${content}\n`;
                 }
             }
         }
