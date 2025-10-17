@@ -18,10 +18,9 @@ const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'));
 
 // Import all tools (they self-register)
 import './tools/log-time.js';
-// Import other tools as you create them:
-// import './tools/check-hours.js';
-// import './tools/weekly-report.js';
-// import './tools/status.js';
+import './tools/check-hours.js';
+import './tools/weekly-report.js';
+import './tools/status.js';
 
 class TimeTrackingMCPServer {
     private server: Server;
