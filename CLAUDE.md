@@ -129,8 +129,8 @@ When creating lists with bold or italic text that should appear on separate line
 
 **Example (note the two spaces at end of lines 1 and 2):**
 ```markdown
-**Last Updated:** 2025-10-15
-**Document Purpose:** Define standards
+**Last Updated:** 2025-10-15  
+**Document Purpose:** Define standards  
 **Owner:** Development Team
 ```
 
