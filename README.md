@@ -4,13 +4,14 @@ Natural language time tracking for Claude Desktop using Model Context Protocol (
 
 ## Features
 
-- 🗣️ **Natural Language Input** - Just say "2h on security review"
-- 📝 **Markdown Storage** - Human-readable files you can edit anywhere
-- 🏢 **Multi-Company Support** - Track time across multiple clients/companies
-- ⏰ **Flexible Time Parsing** - "2h", "90 minutes", "yesterday afternoon"
-- 📊 **Auto-calculated Summaries** - Weekly totals and commitment tracking
-- 🏷️ **Smart Tagging** - Auto-categorize by #development, #meeting, #admin
-- ⚠️ **Commitment Warnings** - Stay within your hour limits
+- **Natural Language Input** - Just say "2h on security review"
+- **Markdown Storage** - Human-readable files you can edit anywhere
+- **Multi-Company Support** - Track time across multiple clients/companies
+- **Flexible Time Parsing** - "2h", "90 minutes", "yesterday afternoon"
+- **Auto-calculated Summaries** - Weekly totals and commitment tracking
+- **Smart Tagging** - Auto-categorize by #development, #meeting, #admin
+- **Commitment Warnings** - Stay within your hour limits
+- **Project Tracking** - Automatically group time by project
 
 ## Quick Start
 
@@ -23,33 +24,11 @@ npm install
 npm run build
 ```
 
-### 2. Configure Claude Desktop
-
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "TimeTracking": {
-      "command": "/path/to/node",
-      "args": ["/path/to/time-tracking-mcp/dist/server.js"],
-      "env": {
-        "TIME_TRACKING_DIR": "/Users/you/Documents/time-tracking",
-        "COMPANIES": "helimods,clientx",
-        "DEFAULT_COMPANY": "helimods",
-        "DISPLAY_TIMEZONE_OFFSET": "10",
-        "DISPLAY_TIMEZONE_STRING": "AEST"
-      }
-    }
-  }
-}
-```
-
-### 3. Set Up Your Time Tracking Directory
+### 2. Set Up Time Tracking Directory
 
 ```bash
 mkdir -p ~/Documents/time-tracking/helimods
-mkdir -p ~/Documents/time-tracking/clientx
+mkdir -p ~/Documents/time-tracking/stellantis
 ```
 
 Create `~/Documents/time-tracking/helimods/config.json`:
@@ -63,129 +42,30 @@ Create `~/Documents/time-tracking/helimods/config.json`:
     "total": { "limit": 25, "unit": "hours/week" }
   },
   "projects": {
+    "Time Tracking MCP": {
+      "tags": ["development", "mcp", "typescript"],
+      "commitment": "development"
+    },
     "Conduit MCP": {
       "tags": ["development", "security"],
       "commitment": "development"
     }
+  },
+  "tagMappings": {
+    "dev": "development",
+    "sync": "meeting"
   }
 }
 ```
 
-### 4. Restart Claude Desktop
+See [docs/example-config.json](docs/example-config.json) for a complete example.
 
-Close and reopen Claude Desktop to load the new MCP server.
+### 3. Configure Claude Desktop
 
-## Usage
+#### For Claude Desktop App
 
-Just talk naturally to Claude:
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
-```
-You: "Just spent 2 hours on Conduit security review"
-Claude: "Logged! Added 2h for Conduit security review at 17:45. 
-        You're at 23.5h this week (94% of 25h limit)."
-
-You: "How am I tracking this week?"
-Claude: "Week 42 Summary:
-        • Total: 23.5h / 25h (94%)
-        • Development: 18.0h / 20h (90%)  
-        • Meetings: 5.5h / 5h ⚠️ (110%)"
-
-You: "Client meeting yesterday 90 minutes"
-Claude: "Logged 1.5h for client meeting on Oct 16 at 15:00 ✓"
-```
-
-## Natural Language Examples
-
-**Quick logging:**
-- "2h on security review"
-- "Just finished 90 minutes on client meeting"
-- "Spent half an hour on email"
-
-**Retroactive entries:**
-- "Yesterday afternoon I did 3 hours of code review"
-- "This morning 2h on planning"
-- "2 hours ago started working on that bug fix"
-
-**Checking status:**
-- "How many hours this week?"
-- "Am I over my limit?"
-- "What did I work on today?"
-- "Show me this week's report"
-
-**Multi-company:**
-- "2h on project X for clientx"
-- "Meeting 1h for helimods"
-
-## File Structure
-
-```
-~/Documents/time-tracking/
-  helimods/
-    config.json
-    2025-week-42.md
-    2025-week-43.md
-  clientx/
-    config.json
-    2025-week-42.md
-```
-
-Each markdown file is human-readable and editable:
-
-```markdown
-# Time Tracking - HeliMods - Week 42 (Oct 14-20, 2025)
-
-## Summary
-- **Total:** 23.5h / 25h limit (94%)
-- **Development:** 18.0h / 20h (90%)
-- **Meetings:** 5.5h / 5h ⚠️ OVER by 0.5h
-
----
-
-## 2025-10-17 Thursday (6.5h)
-
-- 17:45 Client standup (1.75h) #meeting
-- 14:00 Time tracking design (1.5h) #development #meta
-- 10:00 Security review (2.5h) #development #security
-- 09:15 Email and admin (0.75h) #admin
-```
-
-## Tools Available
-
-Claude automatically uses these tools when you interact naturally:
-
-- `log_time` - Log a completed task
-- `check_hours` - Check time totals
-- `weekly_report` - Generate formatted report
-- `status` - Quick status check
-
-You never call these directly - just talk to Claude naturally!
-
-## Configuration
-
-### Environment Variables
-
-- `TIME_TRACKING_DIR` - Where to store markdown files (default: `~/Documents/time-tracking`)
-- `COMPANIES` - Comma-separated list of companies (default: `default`)
-- `DEFAULT_COMPANY` - Default company when not specified (default: first company)
-- `DISPLAY_TIMEZONE_OFFSET` - Hours offset from UTC (default: `0`)
-- `DISPLAY_TIMEZONE_STRING` - Timezone display name (default: `UTC`)
-- `FLEXIBLE_DURATION_PARSING` - Enable flexible duration parsing in markdown files (default: `false`)
-
-#### Flexible Duration Parsing (Experimental)
-
-When `FLEXIBLE_DURATION_PARSING=true`, the markdown parser accepts multiple duration formats:
-
-**Supported formats:**
-- Standard: `(2h)`, `(2.5h)`
-- Minutes: `(30m)`, `(90 minutes)`
-- Natural: `(2 hours)`, `(half an hour)`
-
-**How it works:**
-1. Manual edits can use any format: `- 06:01 debugging (30m) #development`
-2. On next recalculation, entries normalize to standard format: `- 06:01 debugging (0.5h) #development`
-3. Invalid durations are silently ignored (treated as comments)
-
-**To enable:**
 ```json
 {
   "mcpServers": {
@@ -193,16 +73,174 @@ When `FLEXIBLE_DURATION_PARSING=true`, the markdown parser accepts multiple dura
       "command": "/path/to/node",
       "args": ["/path/to/time-tracking-mcp/dist/server.js"],
       "env": {
-        "FLEXIBLE_DURATION_PARSING": "true"
+        "TIME_TRACKING_DIR": "/Users/you/Documents/time-tracking",
+        "COMPANIES": "helimods,stellantis",
+        "DEFAULT_COMPANY": "helimods"
       }
     }
   }
 }
 ```
 
-**Safety:** When disabled (default), only strict format `(Xh)` is parsed, providing protection against accidental format corruption.
+**Find your paths:**
+- Node: `which node`
+- Project: Use full absolute path to this directory
 
-### Company Config (config.json)
+#### For Claude Code CLI
+
+Edit `~/.config/claude-code/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "TimeTracking": {
+      "command": "node",
+      "args": ["/path/to/time-tracking-mcp/dist/server.js"],
+      "env": {
+        "TIME_TRACKING_DIR": "/Users/you/Documents/time-tracking",
+        "COMPANIES": "helimods,stellantis",
+        "DEFAULT_COMPANY": "helimods"
+      }
+    }
+  }
+}
+```
+
+### 4. Restart Claude
+
+Close and reopen Claude Desktop or restart Claude Code CLI.
+
+### 5. Test It
+
+```
+You: "Just spent 2 hours on Time Tracking MCP"
+Claude: "Logged! Added 2h for Time Tracking MCP at 14:30.
+        You're at 10.6h this week (42% of 25h limit)."
+```
+
+## Usage
+
+Just talk naturally to Claude:
+
+```
+You: "Just spent 2 hours on Conduit security review"
+Claude: "Logged! You're at 23.5h / 25h (94%)"
+
+You: "How am I tracking this week?"
+Claude: "Week 42 Summary:
+        • Total: 23.5h / 25h (94%)
+        • Development: 18.0h / 20h (90%)
+        • Meetings: 5.5h / 5h (110%) ⚠️"
+
+You: "Client meeting yesterday 90 minutes"
+Claude: "Logged 1.5h for client meeting on Oct 16 ✓"
+
+You: "Show me this week's report"
+Claude: [Detailed weekly report with breakdown by day, project, and tags]
+```
+
+See [docs/usage-examples.md](docs/usage-examples.md) for more examples.
+
+## How It Works
+
+```
+User: "2h on security review"
+  ↓
+Claude parses: {task: "security review", duration: "2h"}
+  ↓
+MCP Tool: Validates and processes
+  ↓
+Markdown Manager: Appends to weekly file
+  ↓
+File: ~/Documents/time-tracking/company/2025-week-42.md
+```
+
+### File Structure
+
+```
+~/Documents/time-tracking/
+  helimods/
+    config.json
+    2025-week-42.md
+    2025-week-43.md
+  stellantis/
+    config.json
+    2025-week-42.md
+```
+
+### Week File Example
+
+```markdown
+# Time Tracking - HeliMods - Week 42 (Oct 14-20, 2025)
+
+## Summary
+- **Total:** 23.5h / 25h (94%)
+- **Development:** 18.0h / 20h (90%)
+- **Meetings:** 5.5h / 5h (110%) ⚠️
+
+**By Project:**
+• Time Tracking MCP: 6.4h
+• Conduit MCP: 12.0h
+
+---
+
+## 2025-10-17 Friday (10.1h)
+
+- 19:00 add project tracking (1.0h) #mcp
+- 18:02 development (1.0h)
+- 17:28 HeliMods update (1.0h)
+- 22:59 client meeting (1.5h)
+- 06:46 documentation (0.3h) #development
+- 05:52 MCP server (1.0h) #development
+```
+
+**You can edit these files directly!**
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `TIME_TRACKING_DIR` | Where to store markdown files | `~/Documents/time-tracking` |
+| `COMPANIES` | Comma-separated list of companies | `default` |
+| `DEFAULT_COMPANY` | Default company when not specified | First company in list |
+| `DISPLAY_TIMEZONE_OFFSET` | Hours offset from UTC for display | `0` |
+| `DISPLAY_TIMEZONE_STRING` | Timezone name for display | `UTC` |
+| `FLEXIBLE_DURATION_PARSING` | Enable flexible duration parsing in markdown | `false` |
+
+#### Timezone Examples
+
+```json
+"env": {
+  "DISPLAY_TIMEZONE_OFFSET": "10",
+  "DISPLAY_TIMEZONE_STRING": "AEST"
+}
+```
+
+Common timezones:
+- Sydney/Melbourne: `10` (AEST) or `11` (AEDT)
+- London: `0` (GMT) or `1` (BST)
+- New York: `-5` (EST) or `-4` (EDT)
+- Los Angeles: `-8` (PST) or `-7` (PDT)
+
+#### Flexible Duration Parsing (Experimental)
+
+When `FLEXIBLE_DURATION_PARSING=true`, the markdown parser accepts multiple formats:
+
+**Supported formats:**
+- Standard: `(2h)`, `(2.5h)`
+- Minutes: `(30m)`, `(90m)`
+- Natural: `(2 hours)`, `(90 minutes)`
+
+**How it works:**
+1. Manual edits can use any format
+2. On next recalculation, entries normalize to standard `(Xh)` format
+3. Invalid durations are silently ignored
+
+**Default (false):** Only strict `(Xh)` format is parsed, protecting against accidental format corruption.
+
+### Company Configuration
 
 Each company directory should have a `config.json`:
 
@@ -212,6 +250,7 @@ Each company directory should have a `config.json`:
   "commitments": {
     "development": { "limit": 20, "unit": "hours/week" },
     "meeting": { "limit": 5, "unit": "hours/week" },
+    "admin": { "limit": 3, "unit": "hours/week" },
     "total": { "limit": 25, "unit": "hours/week" }
   },
   "projects": {
@@ -227,23 +266,116 @@ Each company directory should have a `config.json`:
 }
 ```
 
+**Configuration options:**
+
+- **commitments**: Define hour limits per category
+  - Each commitment has a `limit` (number) and `unit` (typically "hours/week")
+  - Special `total` commitment tracks all hours
+
+- **projects**: Group related work
+  - Automatically categorized by tags
+  - Maps to commitment categories
+
+- **tagMappings**: Create shortcuts
+  - Map informal tags to formal commitment names
+
+## Multi-Company Usage
+
+### Prefix Pattern
+```
+You: "hm 2h on security review"     # HeliMods
+You: "stla 1h client meeting"       # Stellantis
+```
+
+### Suffix Pattern
+```
+You: "2h on security review for helimods"
+You: "1h meeting for stellantis"
+```
+
+### Company-Specific Queries
+```
+You: "Status for helimods"
+You: "Show me stellantis report"
+```
+
+Claude automatically uses your default company when none is specified.
+
+## Natural Language Examples
+
+### Logging Time
+- "2h on security review"
+- "Just finished 90 minutes on client meeting"
+- "Spent half an hour on email"
+- "Yesterday afternoon I did 3 hours of code review"
+
+### Checking Status
+- "How many hours this week?"
+- "Am I over my limit?"
+- "What did I work on today?"
+- "Show me this week's breakdown"
+
+### Getting Reports
+- "Show me this week's report"
+- "Generate last week's report"
+- "Weekly summary for stellantis"
+
+## Tools Available
+
+Claude automatically uses these MCP tools when you interact naturally:
+
+- **log_time** - Log a completed task
+- **status** - Quick weekly status check
+- **check_hours** - Detailed breakdown (today/week/month)
+- **weekly_report** - Generate formatted report
+
+You never call these directly - just talk to Claude naturally!
+
 ## Development
 
+See [DEVELOPMENT.md](DEVELOPMENT.md) for developer documentation.
+
 ```bash
-# Build
-npm run build
-
-# Development mode (auto-reload)
-npm run dev
-
-# Clean build
-npm run rebuild
-
-# Release (semantic versioning)
-npm run release        # Auto-increment patch
-npm run release:minor  # Increment minor version
-npm run release:major  # Increment major version
+npm run build        # Compile TypeScript
+npm run dev          # Development mode (auto-reload)
+npm run rebuild      # Clean build
+npm run release      # Create new version
 ```
+
+## Why MCP?
+
+Traditional time tracking tools require context switching and structured input. With MCP:
+
+1. **Stay in Claude** - No app switching
+2. **Natural language** - No forms or timers
+3. **Voice-friendly** - Mac dictation works perfectly
+4. **Portable data** - Plain markdown files
+5. **AI-enhanced** - Claude understands your intent
+
+## Troubleshooting
+
+### Claude doesn't respond to time tracking
+
+1. Check Claude config has correct paths (use absolute paths, not `~`)
+2. Verify `npm run build` completed successfully
+3. Restart Claude completely
+4. Check logs: `~/Library/Logs/Claude/mcp*.log`
+
+### "No module found" errors
+
+```bash
+npm run rebuild
+```
+
+### Wrong timezone
+
+Update `DISPLAY_TIMEZONE_OFFSET` in your Claude config.
+
+### Files not being created
+
+- Ensure `TIME_TRACKING_DIR` exists and is writable
+- Use full absolute paths in configuration
+- Check file permissions
 
 ## Versioning
 
@@ -255,23 +387,6 @@ feat: add support for monthly reports
 fix: correct duration parsing for fractional hours
 perf: optimize summary calculations
 ```
-
-## Architecture
-
-- **MCP Server** - Provides tools to Claude
-- **Natural Language** - Claude parses your intent
-- **Markdown Storage** - Simple, portable, human-editable
-- **Auto-summaries** - Calculated on-the-fly from entries
-
-## Why MCP?
-
-Traditional time tracking tools require context switching and structured input. With MCP:
-
-1. Stay in Claude - no app switching
-2. Natural language - no forms or timers
-3. Voice-friendly - Mac dictation works perfectly
-4. Portable data - plain markdown files
-5. AI-enhanced - Claude understands your intent
 
 ## License
 

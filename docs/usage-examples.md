@@ -1,6 +1,6 @@
 # Usage Examples
 
-This document shows how to use the Time Tracking MCP with Claude through natural language.
+Natural language examples for using Time Tracking MCP with Claude.
 
 ## Quick Start
 
@@ -9,8 +9,8 @@ Just talk to Claude naturally about your time:
 ```
 You: "Just spent 2 hours on Conduit security review"
 
-Claude: "✓ Logged 2h for Conduit security review at 17:45
-        
+Claude: "Logged 2h for Conduit security review at 17:45
+
         Week 42 Status:
         • Total: 23.5h / 25h (94%)
         • Development: 18.0h / 20h (90%)
@@ -33,6 +33,21 @@ You: "1.5 hours on code review"
 ```
 You: "2h on Conduit MCP security review #development #security"
 You: "Client standup 30 minutes #meeting"
+You: "Documentation work 1h #development"
+```
+
+### With Projects
+
+When you have projects configured, Claude automatically groups your time:
+
+```
+You: "2h on Time Tracking MCP"
+# Automatically tagged with #development #mcp #typescript
+# Grouped under "Time Tracking MCP" project
+
+You: "1h on Conduit security review"
+# Automatically tagged with #development #security
+# Grouped under "Conduit MCP" project
 ```
 
 ### Retroactive Entries
@@ -44,11 +59,42 @@ You: "2 hours ago started working on that bug fix"
 You: "Last Monday I spent 4h on the integration"
 ```
 
-### Multi-Company
+## Multi-Company Usage
+
+### Single Company Mode (default)
+When you only have one company configured, just log time normally:
+```
+You: "2h on security review"
+Claude: "Logged to HeliMods..."
+```
+
+### Multi-Company Mode
+
+#### Prefix Pattern (Recommended)
+Use company name or abbreviation before the time:
 
 ```
-You: "2h on project X for clientx"
-You: "Meeting 1h for helimods"
+You: "hm 2h on security review"        # HeliMods
+You: "HeliMods 1h client meeting"      # HeliMods
+You: "stla 3h development"             # Stellantis
+You: "Stellantis 2h code review"       # Stellantis
+```
+
+#### Suffix Pattern
+Specify company at the end with "for":
+
+```
+You: "2h on security review for helimods"
+You: "1h meeting for stellantis"
+You: "Client call 90 minutes for HM"
+```
+
+#### Company-Specific Queries
+```
+You: "Status for helimods"
+You: "How many hours for stellantis this week?"
+You: "Show me helimods report"
+You: "Generate stellantis weekly report"
 ```
 
 ## Checking Status
@@ -84,15 +130,15 @@ You: "Show me today's entries"
 
 **Response:**
 ```
-📅 Thursday, 2025-10-17
+📅 Friday, 2025-10-17
 
-Total: 6.5h
+Total: 10.1h
 
 Entries:
-• 17:45 Client standup (1.75h) #meeting
-• 14:00 Time tracking design (1.5h) #development
-• 10:00 Security review (2.5h) #development #security
-• 09:15 Email and admin (0.75h) #admin
+• 19:00 add project tracking (1.0h) #mcp
+• 18:02 development (1.0h)
+• 22:59 client meeting (1.5h)
+• 06:46 documentation (0.3h) #development
 ```
 
 ### Weekly Breakdown
@@ -107,23 +153,22 @@ You: "Weekly summary"
 ```
 📊 Week 42 Summary
 
-Total: 23.5h / 25h (94%)
+Total: 10.6h / 25h (42%)
 
 By Commitment:
-• Development: 18.0h / 20h (90%)
-• Meetings: 5.5h / 5h (110%) ⚠️
+• Development: 6.4h / 20h (32%)
+
+By Project:
+• Time Tracking MCP: 6.4h
 
 By Tag:
-• #development: 18.0h
-• #meeting: 5.5h
-• #security: 4.0h
-• #admin: 2.0h
+• #development: 5.3h
+• #mcp: 1.0h
+• #typescript: 0.1h
 
 By Day:
-• Thursday 2025-10-17: 6.5h (4 entries)
-• Wednesday 2025-10-16: 5.0h (2 entries)
-• Tuesday 2025-10-15: 7.0h (3 entries)
-• Monday 2025-10-14: 5.0h (2 entries)
+• Saturday 2025-10-18: 0.5h (1 entries)
+• Friday 2025-10-17: 10.1h (12 entries)
 ```
 
 ## Full Reports
@@ -148,6 +193,13 @@ You: "Generate report for last week"
 ```
 You: "Report for week 40"
 You: "Show me week 2025-W42"
+```
+
+### Multi-Company Reports
+
+```
+You: "Generate this week's report for helimods"
+You: "Last week's stellantis report"
 ```
 
 ## Natural Language Patterns
@@ -177,7 +229,7 @@ Claude understands various ways of expressing the same thing:
 
 ### Be Specific with Project Names
 
-✅ Good: "2h on Conduit MCP security review"  
+✅ Good: "2h on Conduit MCP security review"
 ❌ Vague: "2h on that thing"
 
 ### Use Consistent Tags
@@ -207,28 +259,9 @@ Do:
 
 Don't try to match a specific format. Just tell Claude what you did:
 
-✅ "Just wrapped up a 2 hour meeting with the client about Q4 planning"  
-✅ "Been working on security review for about 90 minutes"  
+✅ "Just wrapped up a 2 hour meeting with the client about Q4 planning"
+✅ "Been working on security review for about 90 minutes"
 ✅ "Yesterday I spent the afternoon (about 3 hours) on code review"
-
-## Multi-Company Workflows
-
-If you work with multiple companies, specify which one:
-
-```
-You: "2h on security review for helimods"
-You: "Client meeting 1h for clientx"
-You: "Status for helimods"
-You: "This week's report for clientx"
-```
-
-Or set a default and only specify when different:
-
-```
-# Default is helimods
-You: "2h on security review"  # → logs to helimods
-You: "1h meeting for clientx"  # → logs to clientx
-```
 
 ## Warning System
 
@@ -242,7 +275,7 @@ Claude: "✓ Logged 2h for meeting at 14:00
         Week 42 Status:
         • Total: 24.5h / 25h (98%) ⚠️ Almost at limit
         • Meetings: 5.5h / 5h (110%) 🚫 OVER LIMIT
-        
+
         You're at 98% of your weekly limit!"
 ```
 
@@ -255,6 +288,22 @@ If you need to edit an entry:
 3. **Delete entry:** Open the markdown file and delete the line
 
 Files are located at: `~/Documents/time-tracking/{company}/2025-week-{N}.md`
+
+### Flexible Duration Parsing
+
+If you enable `FLEXIBLE_DURATION_PARSING=true` in your configuration, you can manually edit markdown files with more natural formats:
+
+**You can use:**
+- `(30m)` or `(30 minutes)`
+- `(2h)` or `(2 hours)`
+- `(90m)` or `(1.5h)`
+
+**On next calculation, they normalize to:**
+- `(0.5h)`
+- `(2h)`
+- `(1.5h)`
+
+This makes manual editing easier while keeping files consistent.
 
 ## Example Workflow
 
@@ -278,5 +327,45 @@ You: "Last thing was a client meeting, 1 hour 45 minutes"
 Claude: "✓ Logged 1.75h for client meeting..."
 
 You: "What's my total today?"
-Claude: "Thursday Oct 17: 5.0h (3 entries)"
+Claude: "Friday Oct 17: 5.0h (3 entries)"
 ```
+
+## Multi-Company Workflow Example
+
+Working across two companies in one day:
+
+```
+Morning (9:00 AM):
+You: "hm 2h on Time Tracking MCP development"
+Claude: "✓ Logged to HeliMods: 2h for Time Tracking MCP..."
+
+Afternoon (2:00 PM):
+You: "stla 3h on integration testing"
+Claude: "✓ Logged to Stellantis: 3h for integration testing..."
+
+Evening (5:00 PM):
+You: "Status for helimods"
+Claude: "HeliMods Week 42: 10.6h / 25h (42%)"
+
+You: "Status for stellantis"
+Claude: "Stellantis Week 42: 28.8h / 25h (115%) 🚫 OVER"
+```
+
+## Project Tracking
+
+When you have projects configured, Claude automatically groups your time:
+
+```
+You: "2h on Time Tracking MCP refactoring"
+# Automatically uses project tags: #development #mcp #typescript
+# Shows up in project breakdown
+
+You: "Status"
+Claude: "📊 Week 42 Status
+
+        By Project:
+        • Time Tracking MCP: 6.4h
+        • Conduit MCP: 12.0h"
+```
+
+This helps you see time distribution across your projects without manually tracking them.
