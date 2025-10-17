@@ -396,7 +396,7 @@ export class MarkdownManager {
                 try {
                     const { hours } = parseDuration(durationStr);
                     // Rewrite in standard format
-                    normalizedLines.push(prefix + '(' + formatDuration(hours) + ')' + suffix);
+                    normalizedLines.push(prefix + ' (' + formatDuration(hours) + ')' + suffix);
                     continue;
                 } catch (e) {
                     // Keep original if parsing fails
