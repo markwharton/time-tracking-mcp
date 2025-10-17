@@ -4,6 +4,7 @@ import { MarkdownManager } from '../services/markdown-manager.js';
 import { getISOWeek, now, getDayName, formatWeekHeader, getWeekBounds } from '../utils/date-utils.js';
 import { createTextResponse, withErrorHandler } from '../utils/tool-response.js';
 import { getCompanyForOperation } from '../utils/company-resolver.js';
+import { formatProjectBreakdown, formatTagBreakdown } from '../utils/report-formatters.js';
 import type { WeeklyReportInput } from '../types/index.js';
 
 const markdownManager = new MarkdownManager();
@@ -110,17 +111,11 @@ Returns a complete weekly report with all entries organized by day.`,
             response += '\n';
         }
 
-        // Tag breakdown
-        if (Object.keys(summary.byTag).length > 0) {
-            response += `**By Tag:**\n`;
-            const sortedTags = Object.entries(summary.byTag)
-                .sort((a, b) => b[1] - a[1]);
+        // Project breakdown
+        response += formatProjectBreakdown(summary.byProject);
 
-            for (const [tag, hours] of sortedTags) {
-                response += `• #${tag}: ${hours.toFixed(1)}h\n`;
-            }
-            response += '\n';
-        }
+        // Tag breakdown
+        response += formatTagBreakdown(summary.byTag);
 
         response += `---\n\n`;
 

@@ -4,6 +4,7 @@ import { MarkdownManager } from '../services/markdown-manager.js';
 import { getISOWeek, now, formatDate, getDayName } from '../utils/date-utils.js';
 import { createTextResponse, withErrorHandler } from '../utils/tool-response.js';
 import { getCompanyForOperation } from '../utils/company-resolver.js';
+import { formatProjectBreakdown, formatTagBreakdown } from '../utils/report-formatters.js';
 import type { CheckHoursInput } from '../types/index.js';
 
 const markdownManager = new MarkdownManager();
@@ -131,16 +132,14 @@ async function handleWeek(company: string, year: number, week: number, breakdown
         response += '\n';
     }
 
-    // Tag breakdown
-    if (breakdown && Object.keys(summary.byTag).length > 0) {
-        response += `**By Tag:**\n`;
-        const sortedTags = Object.entries(summary.byTag)
-            .sort((a, b) => b[1] - a[1]);
+    // Project breakdown
+    if (breakdown) {
+        response += formatProjectBreakdown(summary.byProject);
+    }
 
-        for (const [tag, hours] of sortedTags) {
-            response += `• #${tag}: ${hours.toFixed(1)}h\n`;
-        }
-        response += '\n';
+    // Tag breakdown
+    if (breakdown) {
+        response += formatTagBreakdown(summary.byTag);
     }
 
     // Daily breakdown
