@@ -97,7 +97,56 @@ The summary section is **calculated, not stored**. It is regenerated on every wr
 - `⚠️ OVERFLOW (Xh into Yh max buffer)` - Over limit but under max
 - `🚨 EXCEEDED MAX (Xh over Yh maximum)` - Over maximum
 
-### 4. Day Sections
+### 4. Spacing Rules (Auto-normalized)
+
+The system automatically enforces consistent spacing on every file write to maintain readability while preserving user content.
+
+**Spacing rules:**
+1. **One blank line after title** - Between `# Time Tracking...` and `## Summary`
+2. **One blank line before Summary** - Already covered by rule 1
+3. **One blank line after separator** - After `---` before first day section
+4. **One blank line after day headers** - After `## 2025-10-19 Sunday (Xh)` before entries
+5. **No blank lines between entries** - Consecutive time entries have no spacing
+6. **One blank line before day sections** - Between last entry and next `## YYYY-MM-DD`
+7. **Blank line before user content** - Prevents confusion with entries above
+8. **Blank line after user content** - Prevents confusion with entries below
+
+**When normalization runs:**
+- Automatically on every time entry log operation
+- Processes entire file, fixing both new and existing formatting
+- Preserves all user content (freeform notes, comments)
+- Removes excessive consecutive blank lines
+
+**Example normalized spacing:**
+```markdown
+# Time Tracking - HeliMods - Week 42 (Oct 13-19, 2025)
+
+## Summary
+- **Total:** 5h
+
+---
+
+## 2025-10-19 Sunday (3h)
+
+- 10:00 task 1 (1h)
+- 11:00 task 2 (1h)
+- 12:00 task 3 (1h)
+
+## 2025-10-18 Saturday (2h)
+
+- 14:00 task 4 (1h)
+- 15:00 task 5 (1h)
+
+User notes or freeform content goes here
+```
+
+**Benefits:**
+- Files remain readable even with manual edits
+- Consistent formatting across all companies and weeks
+- User content clearly separated from time entries
+- No manual formatting maintenance required
+
+### 5. Day Sections
 
 Day sections group entries by date in reverse chronological order (most recent first).
 

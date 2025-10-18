@@ -132,6 +132,64 @@ When you add or modify code:
 
 Keep tools thin - they should orchestrate, not implement. Heavy logic belongs in services or utils.
 
+## Automatic Normalization
+
+### Design Philosophy
+
+Time tracking markdown files self-heal on every write operation. This ensures consistent, readable formatting without requiring manual maintenance or additional user commands.
+
+### Spacing Normalization
+
+The `normalizeSpacing()` method runs automatically when logging time entries:
+
+**What it does:**
+- Enforces 8 spacing rules for consistent layout (see [Format Specification](../reference/format-specification.md))
+- Removes excessive blank lines between entries
+- Protects user content with blank line buffers
+- Processes entire file, fixing both new and existing issues
+
+**Implementation approach:**
+- State machine tracking line types (title, header, entry, separator, user content)
+- Look-ahead/look-behind for context-aware decisions
+- Preserve all content, only adjust spacing
+- Run after all content modifications (entry insertion, summary updates, duration normalization)
+
+**Why automatic:**
+- Users can manually edit files without breaking formatting
+- Handles edge cases from copy-paste or external edits
+- No need for separate "format" or "cleanup" commands
+- Files stay readable in git diffs
+
+### Duration Normalization
+
+When `FLEXIBLE_DURATION_PARSING=true`, the system also normalizes entry durations:
+
+**What it does:**
+- Accepts flexible formats: `(30m)`, `(2 hours)`, `(90 minutes)`
+- Automatically converts to standard: `(0.5h)`, `(2h)`, `(1.5h)`
+- Runs before spacing normalization
+
+**Design:**
+- Single source of truth: `formatDuration()` in duration-parser.ts
+- Consistent across all tools and file operations
+- Preserves manual edits while enforcing standard format
+
+### Auto-Healing Philosophy
+
+**Key principle:** Trust the recalculation, don't store derived data.
+
+The markdown files are designed to auto-heal:
+1. **Summaries** - Always recalculated, never stored
+2. **Day totals** - Derived from entries, updated on every write
+3. **Spacing** - Normalized automatically, no user intervention
+4. **Durations** - Converted to standard format transparently
+
+**Benefits:**
+- Manual edits can't corrupt summaries (they're recalculated)
+- Files remain in consistent state
+- No "sync" or "rebuild" commands needed
+- Git-friendly: fewer spurious changes
+
 ## Markdown Formatting
 
 ### Multi-line Bold/Italic Lists

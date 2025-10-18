@@ -12,6 +12,7 @@ Natural language time tracking for Claude Desktop using Model Context Protocol (
 - **Smart Tagging** - Auto-categorize by #development, #meeting, #admin
 - **Commitment Warnings** - Stay within your hour limits
 - **Project Tracking** - Automatically group time by project
+- **Automatic Formatting** - Files self-organize for readability
 
 ## Quick Start
 
@@ -567,6 +568,51 @@ perf: optimize summary calculations
 - [Multi-Company Patterns](docs/architecture/multi-company-patterns.md) - Pattern 1 vs Pattern 2 comparison
 - [Development Guide](docs/guides/development.md) - Contributing and development workflow
 - [Full Documentation Index](docs/README.md) - Complete documentation map
+
+## Design Philosophy
+
+### Rounding as a Feature
+
+Time entries are displayed with 1 decimal place precision (e.g., `0.5h`, `2.3h`). This creates a natural minimum of **3 minutes** - anything less displays as `0h`.
+
+This isn't a limitation - it's a feature that models reality:
+
+**The context-switching tax:**
+```
+10 × 3-minute tasks = 30 minutes actual work
+                    = 1.0h displayed (10 × 0.1h)
+                    = 0.5h overhead accounted for
+```
+
+**Why this matters:**
+
+Ten 3-minute interruptions genuinely consume closer to an hour of your productive capacity than just 30 minutes. Each task switch incurs hidden costs:
+- Mental context switching between tasks
+- Time to regain flow state after interruptions
+- Finding where you left off and reloading mental state
+- Decision fatigue from rapid context changes
+
+The rounding isn't imprecise - it's **more truthful** than precise tracking would be. It automatically accounts for the real cognitive overhead of fragmented work.
+
+### Automatic Formatting
+
+Time tracking files self-organize on every write:
+- Consistent spacing between sections
+- No manual formatting maintenance required
+- User notes preserved and clearly separated
+- Files stay readable in git diffs
+
+The system enforces 8 spacing rules automatically (see [Format Specification](docs/reference/format-specification.md)) while preserving all your content. Manual edits won't break formatting - the next time entry will clean things up.
+
+### Auto-Healing Data
+
+Summaries and totals are **calculated, never stored**:
+- Manual edits can't corrupt totals
+- Files always show accurate state
+- No "sync" or "rebuild" commands needed
+- Trust the recalculation
+
+This design means you can freely edit markdown files by hand and the system will reconcile everything automatically.
 
 ## License
 
