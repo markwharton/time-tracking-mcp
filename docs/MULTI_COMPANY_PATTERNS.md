@@ -39,6 +39,13 @@ graph TD
     └── 2025-W42.md
 ```
 
+**Environment configuration:**
+```bash
+# Set COMPANIES env var for multi-company mode
+# In your Claude Desktop config:
+COMPANIES="HeliMods,Stellantis"
+```
+
 **HeliMods config.json:**
 ```json
 {
@@ -155,17 +162,17 @@ graph TD
 ```
 ~/Documents/time-tracking/
 ├── config.json
-└── 2025-W42.md
+├── 2025-W42.md
+├── 2025-W41.md
+└── ...
 ```
 
-**Or with organizational folders (folders are just for organization):**
-```
-~/Documents/time-tracking/
-├── config.json
-├── HeliMods/
-│   └── 2025-W42.md
-└── Stellantis/
-    └── 2025-W42.md
+**Environment configuration:**
+```bash
+# Do NOT set COMPANIES env var for single-company mode
+# In your Claude Desktop config or shell:
+TIME_TRACKING_DIR="/Users/yourname/Documents/time-tracking"
+# COMPANIES is NOT set - this enables single-company mode
 ```
 
 **Single config.json:**
@@ -180,23 +187,19 @@ graph TD
   "projects": {
     "HeliMods": {
       "tags": ["hm", "helimods"],
-      "commitment": "development",
-      "description": "HeliMods client work"
+      "commitment": "development"
     },
     "Stellantis": {
       "tags": ["stla", "stellantis"],
-      "commitment": "development",
-      "description": "Stellantis client work"
+      "commitment": "development"
     },
     "Time Tracking MCP": {
       "tags": ["mcp"],
-      "commitment": "development",
-      "description": "MCP server development (cross-client)"
+      "commitment": "development"
     },
     "S2IRIUS Integration": {
       "tags": ["s2irius"],
-      "commitment": "development",
-      "description": "Stellantis S2IRIUS work"
+      "commitment": "development"
     }
   },
   "tagMappings": {

@@ -28,6 +28,17 @@ export class TimeTrackingEnvironment {
     }
 
     /**
+     * Check if running in single-company mode (no COMPANIES env var set)
+     * In single-company mode:
+     * - config.json is at root of tracking dir
+     * - week files are at root of tracking dir
+     * - companies = ['default']
+     */
+    static get isSingleCompanyMode(): boolean {
+        return !process.env.COMPANIES;
+    }
+
+    /**
      * Get timezone display string (e.g., "AEST", "UTC", "PST")
      */
     static get displayTimezoneString(): string {
@@ -90,13 +101,19 @@ export class TimeTrackingEnvironment {
 
     /**
      * Get full path for a company's directory
+     * In single-company mode, returns the tracking dir root
      */
     static getCompanyDir(company: string): string {
+        if (this.isSingleCompanyMode) {
+            return this.trackingDir;
+        }
         return join(this.trackingDir, company);
     }
 
     /**
      * Get full path for a company's config file
+     * In single-company mode: ~/Documents/time-tracking/config.json
+     * In multi-company mode: ~/Documents/time-tracking/{company}/config.json
      */
     static getCompanyConfigPath(company: string): string {
         return join(this.getCompanyDir(company), 'config.json');
@@ -104,6 +121,8 @@ export class TimeTrackingEnvironment {
 
     /**
      * Get full path for a week's markdown file
+     * In single-company mode: ~/Documents/time-tracking/{year}-W{week}.md
+     * In multi-company mode: ~/Documents/time-tracking/{company}/{year}-W{week}.md
      */
     static getWeekFilePath(company: string, year: number, week: number): string {
         const filename = `${year}-W${week.toString().padStart(2, '0')}.md`;
