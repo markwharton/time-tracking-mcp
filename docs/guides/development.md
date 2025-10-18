@@ -40,83 +40,29 @@ src/
 
 ```mermaid
 graph TB
-    subgraph "Entry Point"
-        SERVER[server.ts]
-    end
+    SERVER[Server Entry Point<br/>server.ts]
 
-    subgraph "Tools Layer - Thin Orchestration"
-        REGISTRY[registry.ts]
-        LOGTIME[log-time.ts]
-        STATUS[status.ts]
-        CHECK[check-hours.ts]
-        REPORT[weekly-report.ts]
-    end
+    TOOLS[Tools Layer<br/>Thin orchestration<br/>4 MCP tools]
 
-    subgraph "Services Layer - Business Logic"
-        MARKDOWN[markdown-manager.ts]
-        DURATION[duration-parser.ts]
-        SUMMARY[summary-calculator.ts]
-    end
+    SERVICES[Services Layer<br/>Business logic<br/>Markdown, Duration, Summary]
 
-    subgraph "Utils Layer - Shared Helpers"
-        DATE[date-utils.ts]
-        FILE[file-utils.ts]
-        FORMAT[report-formatters.ts]
-    end
+    UTILS[Utils Layer<br/>Shared helpers<br/>Date, File, Formatting, Strings]
 
-    subgraph "Configuration & Types"
-        ENV[environment.ts]
-        TYPES[types/index.ts]
-    end
+    CONFIG[Configuration & Types<br/>Environment, Types]
 
-    SERVER --> REGISTRY
-    REGISTRY --> LOGTIME
-    REGISTRY --> STATUS
-    REGISTRY --> CHECK
-    REGISTRY --> REPORT
+    SERVER --> TOOLS
+    TOOLS --> SERVICES
+    SERVICES --> UTILS
+    TOOLS --> UTILS
 
-    LOGTIME --> MARKDOWN
-    STATUS --> MARKDOWN
-    CHECK --> MARKDOWN
-    REPORT --> MARKDOWN
-
-    MARKDOWN --> DURATION
-    MARKDOWN --> SUMMARY
-    MARKDOWN --> FILE
-
-    STATUS --> FORMAT
-    CHECK --> FORMAT
-    REPORT --> FORMAT
-
-    DURATION --> DATE
-    SUMMARY --> DATE
-    FORMAT --> DATE
-
-    LOGTIME --> ENV
-    MARKDOWN --> ENV
-
-    LOGTIME -.-> TYPES
-    STATUS -.-> TYPES
-    CHECK -.-> TYPES
-    REPORT -.-> TYPES
-    MARKDOWN -.-> TYPES
-    DURATION -.-> TYPES
-    SUMMARY -.-> TYPES
+    TOOLS -.-> CONFIG
+    SERVICES -.-> CONFIG
 
     style SERVER fill:#e1f5ff
-    style REGISTRY fill:#fff4e1
-    style LOGTIME fill:#ffe1f5
-    style STATUS fill:#ffe1f5
-    style CHECK fill:#ffe1f5
-    style REPORT fill:#ffe1f5
-    style MARKDOWN fill:#e1ffe1
-    style DURATION fill:#e1ffe1
-    style SUMMARY fill:#e1ffe1
-    style DATE fill:#f5e1ff
-    style FILE fill:#f5e1ff
-    style FORMAT fill:#f5e1ff
-    style ENV fill:#fff9e1
-    style TYPES fill:#fff9e1
+    style TOOLS fill:#ffe1f5
+    style SERVICES fill:#e1ffe1
+    style UTILS fill:#f5e1ff
+    style CONFIG fill:#fff9e1
 ```
 
 ## Key Design Decisions
