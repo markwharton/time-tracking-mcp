@@ -7,14 +7,25 @@ The time tracking system uses a flexible tag-based architecture that connects yo
 ## Architecture
 
 ```mermaid
-graph LR
-    A[Time Entry] --> B[Tags]
-    B --> C[Tag Mappings]
-    C --> D[Projects]
-    D --> E[Commitments]
-    C --> F[Reports & Breakdowns]
-    D --> F
-    E --> F
+graph TD
+    A[Time Entry] --> B[Raw Tags<br/>#dev #mcp #bug]
+
+    B --> C[Tag Mapping<br/>Optional]
+    C --> D[Mapped Tags<br/>#development #mcp #bug]
+
+    D --> E{Finding Commitment}
+    E -->|1. Direct Match| F[Commitment<br/>e.g., #development]
+    E -->|2. Via Project| G[Project Match<br/>e.g., #mcp]
+    G --> F
+    E -->|3. No Match| H[No Commitment<br/>e.g., #learn]
+
+    D --> I[Project Matching]
+    I --> J[Matched Projects]
+
+    F --> K[Reports &<br/>Breakdowns]
+    J --> K
+    D --> L[Tag Breakdown]
+    L --> K
 ```
 
 ### Components
