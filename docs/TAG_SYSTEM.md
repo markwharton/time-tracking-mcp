@@ -6,10 +6,15 @@ The time tracking system uses a flexible tag-based architecture that connects yo
 
 ## Architecture
 
-```
-Time Entry → Tags → Tag Mappings → Projects → Commitments
-                                 ↘
-                                   Reports & Breakdowns
+```mermaid
+graph LR
+    A[Time Entry] --> B[Tags]
+    B --> C[Tag Mappings]
+    C --> D[Projects]
+    D --> E[Commitments]
+    C --> F[Reports & Breakdowns]
+    D --> F
+    E --> F
 ```
 
 ### Components
