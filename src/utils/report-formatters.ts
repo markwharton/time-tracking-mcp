@@ -6,37 +6,10 @@
 
 import type { CompanyConfig, DailySummary } from '../types/index.js';
 import { SummaryCalculator } from '../services/summary-calculator.js';
+import { capitalizeName } from './string-utils.js';
 
-// Create singleton instance for utility functions
-const summaryCalculator = new SummaryCalculator();
-
-/**
- * Capitalize first letter of a string
- * @param str - String to capitalize
- * @returns Capitalized string
- */
-export function capitalizeName(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-/**
- * Format tags array as space-separated hashtags
- * @param tags - Array of tag strings
- * @returns Formatted tags string (e.g., "#dev #testing")
- */
-export function formatTags(tags: string[]): string {
-    return tags.map(t => '#' + t).join(' ');
-}
-
-/**
- * Format tags with default value if empty
- * @param tags - Array of tag strings
- * @param defaultValue - Value to return if tags array is empty
- * @returns Formatted tags string or default value
- */
-export function formatTagsWithDefault(tags: string[], defaultValue: string = ''): string {
-    return tags.length > 0 ? formatTags(tags) : defaultValue;
-}
+// Note: We lazily create SummaryCalculator instances instead of a singleton
+// to avoid circular dependency issues with string-utils
 
 /**
  * Sort daily summaries in descending order by date
@@ -89,6 +62,7 @@ export function formatCommitmentBreakdown(
         return '';
     }
 
+    const summaryCalculator = new SummaryCalculator();
     let output = `**By Commitment:**\n`;
 
     for (const [commitment, hours] of Object.entries(byCommitment)) {

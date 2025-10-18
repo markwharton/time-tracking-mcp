@@ -9,9 +9,9 @@ import {
     formatTagBreakdown,
     formatTotalHours,
     formatCommitmentBreakdown,
-    formatTagsWithDefault,
     sortDaysDescending
 } from '../utils/report-formatters.js';
+import { formatTagsWithDefault } from '../utils/string-utils.js';
 import type { CheckHoursInput } from '../types/index.js';
 
 const markdownManager = new MarkdownManager();

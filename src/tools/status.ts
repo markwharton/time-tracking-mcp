@@ -4,7 +4,7 @@ import { MarkdownManager } from '../services/markdown-manager.js';
 import { getISOWeek, now } from '../utils/date-utils.js';
 import { createTextResponse, withErrorHandler, MULTI_COMPANY_GUIDANCE } from '../utils/tool-response.js';
 import { getCompanyForOperation } from '../utils/company-resolver.js';
-import { capitalizeName } from '../utils/report-formatters.js';
+import { capitalizeName } from '../utils/string-utils.js';
 import { SummaryCalculator } from '../services/summary-calculator.js';
 import type { StatusInput } from '../types/index.js';
 

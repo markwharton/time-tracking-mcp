@@ -5,7 +5,7 @@ import { parseDuration } from '../services/duration-parser.js';
 import { parseDate, parseTime, formatDate, formatTime, getISOWeek } from '../utils/date-utils.js';
 import { createTextResponse, withErrorHandler } from '../utils/tool-response.js';
 import { getCompanyForOperation } from '../utils/company-resolver.js';
-import { capitalizeName } from '../utils/report-formatters.js';
+import { capitalizeName } from '../utils/string-utils.js';
 import { SummaryCalculator } from '../services/summary-calculator.js';
 import type { LogTimeInput, TimeEntry } from '../types/index.js';
 

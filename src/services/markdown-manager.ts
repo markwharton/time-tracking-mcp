@@ -5,7 +5,7 @@ import { formatDate, formatWeekHeader, getDayName, getWeekBounds, getISOWeek } f
 import { formatDuration, parseDuration } from './duration-parser.js';
 import { SummaryCalculator } from './summary-calculator.js';
 import { AuditLog } from './audit-log.js';
-import { formatTagsWithDefault, capitalizeName } from '../utils/report-formatters.js';
+import { formatTagsWithDefault, capitalizeName } from '../utils/string-utils.js';
 import type { TimeEntry, DailySummary, WeeklySummary, CompanyConfig, ParseIssues } from '../types/index.js';
 
 export class MarkdownManager {

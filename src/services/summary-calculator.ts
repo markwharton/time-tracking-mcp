@@ -1,5 +1,5 @@
 // src/services/summary-calculator.ts
-import { capitalizeName } from '../utils/report-formatters.js';
+import { capitalizeName } from '../utils/string-utils.js';
 import type { TimeEntry, DailySummary, WeeklySummary, CompanyConfig } from '../types/index.js';
 
 /**

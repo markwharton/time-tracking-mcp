@@ -1,7 +1,7 @@
 // src/services/audit-log.ts
 import { TimeTrackingEnvironment } from '../config/environment.js';
 import { writeFileSafe } from '../utils/file-utils.js';
-import { formatTagsWithDefault } from '../utils/report-formatters.js';
+import { formatTagsWithDefault } from '../utils/string-utils.js';
 import type { TimeEntry } from '../types/index.js';
 import { appendFile } from 'fs/promises';
 import { join } from 'path';

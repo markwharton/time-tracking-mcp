@@ -7,10 +7,9 @@ import { getCompanyForOperation } from '../utils/company-resolver.js';
 import {
     formatProjectBreakdown,
     formatTagBreakdown,
-    formatTagsWithDefault,
-    sortDaysDescending,
-    capitalizeName
+    sortDaysDescending
 } from '../utils/report-formatters.js';
+import { formatTagsWithDefault, capitalizeName } from '../utils/string-utils.js';
 import { SummaryCalculator } from '../services/summary-calculator.js';
 import type { WeeklyReportInput } from '../types/index.js';
 
