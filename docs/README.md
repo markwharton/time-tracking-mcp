@@ -184,3 +184,9 @@ When adding new documentation:
 | Environment variables | [Claude Desktop Setup](setup/claude-desktop.md) | Environment Configuration |
 | Development workflow | [Development Guide](guides/development.md) | Project Structure |
 | Code principles | [Development Principles](architecture/development-principles.md) | Core Principles |
+
+## See Also
+
+- [Main README](../README.md) - Quick start and overview
+- [Tag System Guide](architecture/tag-system.md) - Core architecture concept
+- [Usage Examples](guides/usage-examples.md) - Practical examples for getting started

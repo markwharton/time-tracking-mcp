@@ -366,6 +366,6 @@ config.json (total capacity)
 
 ## See Also
 
-- [TAG_SYSTEM.md](TAG_SYSTEM.md) - Tag system design and architecture
-- [FORMAT_SPEC.md](../FORMAT_SPEC.md) - Markdown file format
-- [README.md](../README.md) - Getting started guide
+- [Tag System Guide](tag-system.md) - Understanding tag-based architecture
+- [Claude Desktop Setup](../setup/claude-desktop.md) - Environment configuration
+- [Main README](../../README.md) - Quick start guide

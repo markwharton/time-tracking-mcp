@@ -543,3 +543,9 @@ You: "1h open source contribution #oss #development"
 ```
 
 **Benefit:** Track all activities while only enforcing limits on specific commitment categories.
+
+## See Also
+
+- [Tag System Guide](../architecture/tag-system.md) - Understanding tag routing and mapping
+- [Multi-Company Patterns](../architecture/multi-company-patterns.md) - Managing multiple companies
+- [Main README](../../README.md) - Quick start guide

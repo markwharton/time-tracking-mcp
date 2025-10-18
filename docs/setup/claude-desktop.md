@@ -9,6 +9,8 @@ There are **two separate environments** for running Claude with MCP servers, eac
 
 These are **independent** and require **separate configurations** for MCP servers.
 
+**Platform Support:** macOS only (tested). File paths shown are macOS-specific. Windows/Linux paths may differ and are untested.
+
 ## Key Differences
 
 ### Claude Desktop
@@ -189,3 +191,8 @@ claude mcp list
 - `claude mcp add` command doesn't warn about missing env variables
 - Error messages don't indicate which config is being used
 - Assumption that Claude Desktop config would be inherited by CLI
+
+## See Also
+
+- [Main README](../../README.md) - Quick start and installation
+- [Multi-Company Patterns](../architecture/multi-company-patterns.md) - Environment configuration patterns

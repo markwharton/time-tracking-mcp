@@ -15,6 +15,8 @@ Natural language time tracking for Claude Desktop using Model Context Protocol (
 
 ## Quick Start
 
+**Platform Support:** macOS only (tested). Windows/Linux paths may differ and are untested.
+
 ### 1. Install
 
 ```bash
@@ -117,6 +119,73 @@ You: "Just spent 2 hours on Time Tracking MCP"
 Claude: "Logged! Added 2h for Time Tracking MCP at 14:30.
         You're at 10.6h this week (42% of 25h limit)."
 ```
+
+## Your First Day
+
+### Quick Glossary
+
+Before you dive in, here are the core concepts:
+
+- **Entry**: A single time log (e.g., "2h on security review at 14:30")
+- **Tag**: Category marker that categorizes work (`#development`, `#meeting`, `#admin`)
+- **Commitment**: Time allocation bucket (e.g., development: 20h/week, meeting: 5h/week)
+- **Project**: Collection of related work (automatically mapped via tags)
+- **Company**: Separate time tracking workspace (HeliMods, Stellantis, etc.)
+
+### Mental Model: How It Works
+
+```
+Your entry → Tag detected → Maps to Commitment → Groups into Project → Appears in Reports
+```
+
+**Example flow:**
+1. You say: "2h on Conduit MCP security review"
+2. System detects: `#conduit` tag (from "Conduit MCP")
+3. Maps to: `development` commitment (via config.json projects)
+4. Groups into: "Conduit MCP" project
+5. Appears in: Weekly totals, commitment tracking, project breakdown
+
+### 5-Minute Tutorial
+
+**Step 1: Log your first entry**
+```
+You: "Just spent 2 hours on project review"
+Claude: "Logged! Added 2h for project review at 14:30."
+```
+
+**Step 2: Check your hours**
+```
+You: "How many hours this week?"
+Claude: "Week 42 Summary: 2.0h / 25h (8%)"
+```
+
+**Step 3: View your report**
+```
+You: "Show me this week's report"
+Claude: [Shows detailed weekly breakdown by day, project, and tags]
+```
+
+### Common Workflows
+
+**Daily logging:**
+- Log as you work: "1.5h on client meeting"
+- Or batch at end of day: "Today I did 3h development, 1h meeting"
+
+**Weekly review:**
+- Check totals: "How am I tracking this week?"
+- Review commitments: "Show me this week's breakdown"
+- Spot overages: System warns you at 90% and 100% of limits
+
+**Monthly reporting:**
+- Generate reports: "Show me week 42 report"
+- Review by project: Reports show automatic project grouping
+- Track trends: Compare week-over-week totals
+
+### Next Steps
+
+- See [Usage Examples](docs/guides/usage-examples.md) for natural language patterns
+- Read [Tag System Guide](docs/architecture/tag-system.md) to understand tag routing
+- Check [Multi-Company Patterns](docs/architecture/multi-company-patterns.md) for multi-client workflows
 
 ## Usage
 
@@ -490,6 +559,14 @@ feat: add support for monthly reports
 fix: correct duration parsing for fractional hours
 perf: optimize summary calculations
 ```
+
+## See Also
+
+- [Usage Examples](docs/guides/usage-examples.md) - Natural language patterns and multi-company workflows
+- [Tag System Guide](docs/architecture/tag-system.md) - Deep dive into tag-based architecture
+- [Multi-Company Patterns](docs/architecture/multi-company-patterns.md) - Pattern 1 vs Pattern 2 comparison
+- [Development Guide](docs/guides/development.md) - Contributing and development workflow
+- [Full Documentation Index](docs/README.md) - Complete documentation map
 
 ## License
 

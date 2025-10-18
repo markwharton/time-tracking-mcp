@@ -584,6 +584,7 @@ With unique project identifiers:
 
 ## See Also
 
-- [FORMAT_SPEC.md](../FORMAT_SPEC.md) - Markdown file format specification
-- [README.md](../README.md) - Overview and setup guide
-- [Configuration schema](../src/config/schema.ts) - TypeScript type definitions
+- [Usage Examples](../guides/usage-examples.md) - Practical tag usage patterns
+- [Format Specification](../reference/format-specification.md) - Technical format details
+- [Multi-Company Patterns](multi-company-patterns.md) - Organizing across companies
+- [Main README](../../README.md) - Quick start guide
