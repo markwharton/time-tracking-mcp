@@ -188,7 +188,7 @@ flowchart TD
 - **Types** - Shared interfaces
 
 ### DRY Principle
-See [CLAUDE.md](CLAUDE.md) for detailed guidance on avoiding code duplication.
+See [CLAUDE.md](../../CLAUDE.md) for detailed guidance on avoiding code duplication.
 
 **Key rule:** If logic appears in multiple places, extract to a shared utility.
 

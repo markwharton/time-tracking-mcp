@@ -32,7 +32,7 @@ This document provides quick navigation to key documentation for Claude Code whe
 - Tag system implementation
 - Format versioning
 
-**[Configuration Schema](docs/reference/example-config.json)** - Example company configuration
+**[Configuration Schema](docs/example-config.json)** - Example company configuration
 
 ## Development Guides
 
