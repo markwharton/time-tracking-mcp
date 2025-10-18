@@ -1,7 +1,7 @@
 // src/tools/weekly-report.ts
 import { registerTool } from './registry.js';
 import { MarkdownManager } from '../services/markdown-manager.js';
-import { getISOWeek, now, getDayName, formatWeekHeader, getWeekBounds } from '../utils/date-utils.js';
+import { getISOWeek, now, getDayName, formatWeekHeader, getWeekBounds, getWeeksInYear, validateWeekNumber } from '../utils/date-utils.js';
 import { createTextResponse, withErrorHandler, MULTI_COMPANY_GUIDANCE } from '../utils/tool-response.js';
 import { getCompanyForOperation } from '../utils/company-resolver.js';
 import {
@@ -12,6 +12,7 @@ import {
 import { formatTagsWithDefault, capitalizeName } from '../utils/string-utils.js';
 import { SummaryCalculator } from '../services/summary-calculator.js';
 import type { WeeklyReportInput } from '../types/index.js';
+import { STATUS_THEMES } from '../types/index.js';
 
 const summaryCalculator = new SummaryCalculator();
 
@@ -60,7 +61,8 @@ Returns a complete weekly report with all entries organized by day.${MULTI_COMPA
             week -= 1;
             if (week < 1) {
                 year -= 1;
-                week = 52; // Approximate, ISO weeks can be 52 or 53
+                // Get the actual number of weeks in the previous year (52 or 53)
+                week = getWeeksInYear(year);
             }
         } else if (args.week && args.week !== 'current') {
             // Parse ISO week format: 2025-W42
@@ -68,8 +70,13 @@ Returns a complete weekly report with all entries organized by day.${MULTI_COMPA
             if (match) {
                 year = parseInt(match[1]);
                 week = parseInt(match[2]);
+            } else {
+                throw new Error(`Invalid week format: "${args.week}". Use "current", "last", or "YYYY-WNN" format (e.g., "2025-W42")`);
             }
         }
+
+        // Validate week number is within valid range for the year
+        validateWeekNumber(year, week);
 
         const summary = await markdownManager.getWeeklySummary(company, year, week);
         const config = await markdownManager.loadConfig(company);
@@ -91,7 +98,7 @@ Returns a complete weekly report with all entries organized by day.${MULTI_COMPA
 
         const totalLimit = config.commitments.total?.limit;
         if (totalLimit) {
-            const stats = summaryCalculator.getCommitmentStats(summary.totalHours, totalLimit);
+            const stats = summaryCalculator.getCommitmentStats(summary.totalHours, totalLimit, STATUS_THEMES.text);
             response += ` / ${totalLimit}h (${stats.percentage}%)\n`;
             response += `**Remaining:** ${stats.remaining.toFixed(1)}h available\n`;
         } else {
@@ -100,7 +107,7 @@ Returns a complete weekly report with all entries organized by day.${MULTI_COMPA
 
         response += '\n';
 
-        // Commitment breakdown - weekly report uses different emoji (OVER/Close/✓)
+        // Commitment breakdown - weekly report uses text theme for richer indicators
         if (Object.keys(summary.byCommitment).length > 0) {
             response += `**Commitment Breakdown:**\n`;
             for (const [commitment, hours] of Object.entries(summary.byCommitment)) {
@@ -108,9 +115,8 @@ Returns a complete weekly report with all entries organized by day.${MULTI_COMPA
                 const name = capitalizeName(commitment);
 
                 if (limit) {
-                    const stats = summaryCalculator.getCommitmentStats(hours, limit);
-                    const status = stats.status === 'over' ? '🚫 OVER' : stats.status === 'approaching' ? '⚠️ Close' : '✓';
-                    response += `• **${name}:** ${hours.toFixed(1)}h / ${limit}h (${stats.percentage}%) ${status}\n`;
+                    const stats = summaryCalculator.getCommitmentStats(hours, limit, STATUS_THEMES.text);
+                    response += `• **${name}:** ${hours.toFixed(1)}h / ${limit}h (${stats.percentage}%) ${stats.indicator}\n`;
                 } else {
                     response += `• **${name}:** ${hours.toFixed(1)}h\n`;
                 }

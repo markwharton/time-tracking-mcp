@@ -2,6 +2,34 @@
 import { TimeTrackingEnvironment } from '../config/environment.js';
 
 /**
+ * Validate company name for path safety
+ * Ensures company names don't contain path traversal characters
+ * @param company - Company name to validate
+ * @throws Error if company name contains unsafe characters
+ */
+function validateCompanyNameSafety(company: string): void {
+    // Disallow path traversal patterns
+    if (company.includes('..') || company.includes('/') || company.includes('\\')) {
+        throw new Error(`Invalid company name: "${company}". Company names cannot contain path separators or '..'`);
+    }
+
+    // Disallow empty or whitespace-only names
+    if (!company || company.trim().length === 0) {
+        throw new Error('Company name cannot be empty');
+    }
+
+    // Disallow names starting with dot (hidden files)
+    if (company.startsWith('.')) {
+        throw new Error(`Invalid company name: "${company}". Company names cannot start with '.'`);
+    }
+
+    // Ensure reasonable length
+    if (company.length > 100) {
+        throw new Error(`Company name too long: "${company}". Maximum 100 characters.`);
+    }
+}
+
+/**
  * Resolve company name from input string (case-insensitive)
  * Supports both full company names and abbreviations
  *
@@ -98,6 +126,10 @@ export function extractCompanyFromInput(input: string): string | null {
  * @throws Error if company not in configured list
  */
 export function validateCompany(company: string): void {
+    // First check path safety
+    validateCompanyNameSafety(company);
+
+    // Then check if it's in the configured list
     const companies = TimeTrackingEnvironment.companies;
     if (!companies.includes(company)) {
         throw new Error(`Company "${company}" is not configured. Configured companies: ${companies.join(', ')}`);
@@ -110,6 +142,22 @@ export function validateCompany(company: string): void {
  */
 export function isSingleCompanyMode(): boolean {
     return TimeTrackingEnvironment.companies.length === 1;
+}
+
+/**
+ * Validate all configured companies for path safety
+ * Should be called at server startup
+ * @throws Error if any configured company has an unsafe name
+ */
+export function validateConfiguredCompanies(): void {
+    const companies = TimeTrackingEnvironment.companies;
+    for (const company of companies) {
+        try {
+            validateCompanyNameSafety(company);
+        } catch (error) {
+            throw new Error(`Invalid company in configuration: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
 }
 
 /**

@@ -2,6 +2,30 @@
 import type { Duration } from '../types/index.js';
 
 /**
+ * Duration validation constants
+ */
+const MIN_DURATION_HOURS = 0.08; // 5 minutes minimum (rounded from 1/12 hour)
+const MAX_DURATION_HOURS = 24;   // 24 hours maximum per entry
+
+/**
+ * Validate duration is within reasonable bounds
+ */
+function validateDuration(hours: number, input: string): void {
+    if (hours < MIN_DURATION_HOURS) {
+        throw new Error(`Duration too short: "${input}". Minimum duration is 5 minutes (0.08h)`);
+    }
+    if (hours > MAX_DURATION_HOURS) {
+        throw new Error(`Duration too long: "${input}". Maximum duration is 24 hours per entry`);
+    }
+    if (hours < 0) {
+        throw new Error(`Duration cannot be negative: "${input}"`);
+    }
+    if (!isFinite(hours)) {
+        throw new Error(`Invalid duration value: "${input}"`);
+    }
+}
+
+/**
  * Parse duration string into decimal hours
  * Supports multiple formats:
  * - "2h", "2 hours", "2.5h"
@@ -14,17 +38,22 @@ export function parseDuration(input: string): Duration {
 
     // Handle natural language
     if (normalized.match(/half\s*(an?\s*)?hour/)) {
-        return { hours: 0.5, formatted: '0.5h' };
+        const hours = 0.5;
+        validateDuration(hours, input);
+        return { hours, formatted: '0.5h' };
     }
 
     if (normalized.match(/quarter\s*(of\s*an?\s*)?hour/)) {
-        return { hours: 0.25, formatted: '0.25h' };
+        const hours = 0.25;
+        validateDuration(hours, input);
+        return { hours, formatted: '0.25h' };
     }
 
     // Parse hours: "2h", "2 hours", "2.5h"
     const hoursMatch = normalized.match(/^(\d+(?:\.\d+)?)\s*(hour|hr|h)s?$/);
     if (hoursMatch) {
         const hours = parseFloat(hoursMatch[1]);
+        validateDuration(hours, input);
         return { hours, formatted: `${hours}h` };
     }
 
@@ -33,6 +62,7 @@ export function parseDuration(input: string): Duration {
     if (minutesMatch) {
         const minutes = parseInt(minutesMatch[1]);
         const hours = minutes / 60;
+        validateDuration(hours, input);
         return { hours, formatted: `${hours.toFixed(2)}h` };
     }
 
@@ -46,6 +76,7 @@ export function parseDuration(input: string): Duration {
         if (minutesStr) totalHours += parseInt(minutesStr) / 60;
         if (secondsStr) totalHours += parseFloat(secondsStr) / 3600;
 
+        validateDuration(totalHours, input);
         return { hours: totalHours, formatted: `${totalHours.toFixed(2)}h` };
     }
 
@@ -53,6 +84,7 @@ export function parseDuration(input: string): Duration {
     const numberMatch = normalized.match(/^(\d+(?:\.\d+)?)$/);
     if (numberMatch) {
         const hours = parseFloat(numberMatch[1]);
+        validateDuration(hours, input);
         return { hours, formatted: `${hours}h` };
     }
 

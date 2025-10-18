@@ -7,6 +7,7 @@ import { getCompanyForOperation } from '../utils/company-resolver.js';
 import { capitalizeName } from '../utils/string-utils.js';
 import { SummaryCalculator } from '../services/summary-calculator.js';
 import type { StatusInput } from '../types/index.js';
+import { STATUS_THEMES } from '../types/index.js';
 
 const summaryCalculator = new SummaryCalculator();
 
@@ -57,10 +58,11 @@ Returns a brief summary of the current week's time.${MULTI_COMPANY_GUIDANCE}`,
         // Total hours with status-specific formatting
         const totalLimit = config.commitments.total?.limit || 0;
         if (totalLimit > 0) {
-            const stats = summaryCalculator.getCommitmentStats(summary.totalHours, totalLimit);
+            const stats = summaryCalculator.getCommitmentStats(summary.totalHours, totalLimit, STATUS_THEMES.emoji);
 
             response += `**Total:** ${summary.totalHours.toFixed(1)}h / ${totalLimit}h (${stats.percentage}%)`;
 
+            // Add status-specific messaging
             if (stats.status === 'over') {
                 response += ` 🚫 OVER LIMIT\n`;
             } else if (stats.status === 'approaching') {
@@ -74,9 +76,7 @@ Returns a brief summary of the current week's time.${MULTI_COMPANY_GUIDANCE}`,
             response += `**Total:** ${summary.totalHours.toFixed(1)}h\n\n`;
         }
 
-        // Commitment breakdown - using shared formatter
-        // Note: status.ts uses different emoji logic (shows ✓ for within)
-        // so we'll keep custom formatting here for status consistency
+        // Commitment breakdown - using emoji theme with status indicator
         if (Object.keys(summary.byCommitment).length > 0) {
             response += `**By Commitment:**\n`;
             for (const [commitment, hours] of Object.entries(summary.byCommitment)) {
@@ -84,9 +84,8 @@ Returns a brief summary of the current week's time.${MULTI_COMPANY_GUIDANCE}`,
                 const name = capitalizeName(commitment);
 
                 if (limit) {
-                    const stats = summaryCalculator.getCommitmentStats(hours, limit);
-                    const emoji = stats.status === 'over' ? '🚫' : stats.status === 'approaching' ? '⚠️' : '✓';
-                    response += `• ${name}: ${hours.toFixed(1)}h / ${limit}h (${stats.percentage}%) ${emoji}\n`;
+                    const stats = summaryCalculator.getCommitmentStats(hours, limit, STATUS_THEMES.emoji);
+                    response += `• ${name}: ${hours.toFixed(1)}h / ${limit}h (${stats.percentage}%) ${stats.indicator}\n`;
                 } else {
                     response += `• ${name}: ${hours.toFixed(1)}h\n`;
                 }

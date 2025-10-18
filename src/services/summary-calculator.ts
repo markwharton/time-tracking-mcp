@@ -1,6 +1,7 @@
 // src/services/summary-calculator.ts
 import { capitalizeName } from '../utils/string-utils.js';
-import type { TimeEntry, DailySummary, WeeklySummary, CompanyConfig } from '../types/index.js';
+import type { TimeEntry, DailySummary, WeeklySummary, CompanyConfig, CommitmentStatus, StatusIndicators } from '../types/index.js';
+import { STATUS_THEMES } from '../types/index.js';
 
 /**
  * Calculate summaries and aggregations from time entries
@@ -113,16 +114,22 @@ export class SummaryCalculator {
     }
 
     /**
+     * Threshold for approaching limit (percentage)
+     */
+    private static readonly APPROACHING_THRESHOLD = 90;
+    private static readonly OVER_THRESHOLD = 100;
+
+    /**
      * Calculate commitment status (within limit, approaching, over)
      */
     calculateCommitmentStatus(
         hours: number,
         limit: number
-    ): 'within' | 'approaching' | 'over' {
+    ): CommitmentStatus {
         const percent = (hours / limit) * 100;
 
-        if (percent > 100) return 'over';
-        if (percent > 90) return 'approaching';
+        if (percent > SummaryCalculator.OVER_THRESHOLD) return 'over';
+        if (percent > SummaryCalculator.APPROACHING_THRESHOLD) return 'approaching';
         return 'within';
     }
 
@@ -142,37 +149,31 @@ export class SummaryCalculator {
 
     /**
      * Get summary statistics for a commitment
+     * @param hours - Hours worked
+     * @param limit - Hour limit
+     * @param theme - Status indicator theme (defaults to 'emoji')
      */
     getCommitmentStats(
         hours: number,
-        limit: number
+        limit: number,
+        theme: StatusIndicators = STATUS_THEMES.emoji
     ): {
         hours: number;
         limit: number;
         percentage: number;
         remaining: number;
-        status: 'within' | 'approaching' | 'over';
-        emoji: string;
+        status: CommitmentStatus;
+        indicator: string;
     } {
+        const status = this.calculateCommitmentStatus(hours, limit);
         return {
             hours,
             limit,
             percentage: this.calculatePercentage(hours, limit),
             remaining: this.calculateRemaining(hours, limit),
-            status: this.calculateCommitmentStatus(hours, limit),
-            emoji: this.getStatusEmoji(this.calculateCommitmentStatus(hours, limit))
+            status,
+            indicator: theme[status]
         };
-    }
-
-    /**
-     * Get emoji for status
-     */
-    private getStatusEmoji(status: 'within' | 'approaching' | 'over'): string {
-        switch (status) {
-            case 'within': return '✓';
-            case 'approaching': return '⚠️';
-            case 'over': return '🚫';
-        }
     }
 
     /**
@@ -184,8 +185,8 @@ export class SummaryCalculator {
         // Total hours
         const totalLimit = config.commitments.total?.limit;
         if (totalLimit) {
-            const stats = this.getCommitmentStats(summary.totalHours, totalLimit);
-            output += `- **Total:** ${summary.totalHours.toFixed(1)}h / ${totalLimit}h (${stats.percentage}%) ${stats.emoji}\n`;
+            const stats = this.getCommitmentStats(summary.totalHours, totalLimit, STATUS_THEMES.emoji);
+            output += `- **Total:** ${summary.totalHours.toFixed(1)}h / ${totalLimit}h (${stats.percentage}%) ${stats.indicator}\n`;
             output += `- **Remaining:** ${stats.remaining.toFixed(1)}h available\n`;
         } else {
             output += `- **Total:** ${summary.totalHours.toFixed(1)}h\n`;
@@ -200,9 +201,9 @@ export class SummaryCalculator {
                 const name = capitalizeName(commitment);
 
                 if (limit) {
-                    const stats = this.getCommitmentStats(hours, limit);
+                    const stats = this.getCommitmentStats(hours, limit, STATUS_THEMES.emoji);
                     const warning = stats.status === 'over' ? ' OVER' : '';
-                    output += `- **${name}:** ${hours.toFixed(1)}h / ${limit}h (${stats.percentage}%)${warning} ${stats.emoji}\n`;
+                    output += `- **${name}:** ${hours.toFixed(1)}h / ${limit}h (${stats.percentage}%)${warning} ${stats.indicator}\n`;
                 } else {
                     output += `- **${name}:** ${hours.toFixed(1)}h\n`;
                 }

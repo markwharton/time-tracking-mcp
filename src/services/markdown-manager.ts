@@ -50,19 +50,29 @@ export class MarkdownManager {
      */
     async loadConfig(company: string): Promise<CompanyConfig> {
         const configPath = TimeTrackingEnvironment.getCompanyConfigPath(company);
-        const config = await readJSON<CompanyConfig>(configPath);
 
-        if (!config) {
-            // Return default config if none exists
-            return {
-                company: company.charAt(0).toUpperCase() + company.slice(1),
-                commitments: {
-                    total: { limit: 40, unit: 'hours/week' }
-                }
-            };
+        try {
+            const config = await readJSON<CompanyConfig>(configPath);
+
+            if (!config) {
+                // Return default config if none exists
+                return {
+                    company: company.charAt(0).toUpperCase() + company.slice(1),
+                    commitments: {
+                        total: { limit: 40, unit: 'hours/week' }
+                    }
+                };
+            }
+
+            return config;
+        } catch (error) {
+            // Provide helpful error for invalid JSON
+            if (error instanceof SyntaxError) {
+                throw new Error(`Invalid JSON in config file: ${configPath}. ${error.message}`);
+            }
+            // Re-throw other errors
+            throw error;
         }
-
-        return config;
     }
 
     /**
@@ -106,8 +116,9 @@ export class MarkdownManager {
         }
 
         // Recalculate and update summary AND day totals
+        const config = await this.loadConfig(company);
         const summary = await this.calculateWeeklySummary(company, year, week, content);
-        content = this.updateSummaryInContent(content, summary);
+        content = this.updateSummaryInContent(content, summary, config);
         content = this.updateDayTotalsInContent(content, summary);
 
         // Normalize entry durations to standard format if flexible parsing is enabled
@@ -164,16 +175,15 @@ export class MarkdownManager {
         const entries = this.parseEntries(content);
         const weekBounds = getWeekBounds(year, week);
 
-        // Cache config for updateSummaryInContent
-        this.cachedConfig = config;
-
         // Group entries by date to build daily summaries
         const entriesByDate = new Map<string, TimeEntry[]>();
         for (const entry of entries) {
-            if (!entriesByDate.has(entry.date)) {
-                entriesByDate.set(entry.date, []);
+            const dateEntries = entriesByDate.get(entry.date);
+            if (dateEntries) {
+                dateEntries.push(entry);
+            } else {
+                entriesByDate.set(entry.date, [entry]);
             }
-            entriesByDate.get(entry.date)!.push(entry);
         }
 
         // Build daily summaries
@@ -303,9 +313,7 @@ export class MarkdownManager {
     /**
      * Update summary section in markdown content
      */
-    private updateSummaryInContent(content: string, summary: WeeklySummary): string {
-        const config = this.cachedConfig;
-        if (!config) return content;
+    private updateSummaryInContent(content: string, summary: WeeklySummary, config: CompanyConfig): string {
 
         let summaryText = '## Summary\n';
 
@@ -568,8 +576,6 @@ export class MarkdownManager {
         return normalized.join('\n');
     }
 
-    private cachedConfig: CompanyConfig | null = null;
-
     /**
      * Read weekly summary from file
      */
@@ -581,7 +587,6 @@ export class MarkdownManager {
             return null;
         }
 
-        this.cachedConfig = await this.loadConfig(company);
         return this.calculateWeeklySummary(company, year, week, content);
     }
 }

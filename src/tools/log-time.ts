@@ -5,7 +5,7 @@ import { parseDuration } from '../services/duration-parser.js';
 import { parseDate, parseTime, formatDate, formatTime, getISOWeek } from '../utils/date-utils.js';
 import { createTextResponse, withErrorHandler } from '../utils/tool-response.js';
 import { getCompanyForOperation } from '../utils/company-resolver.js';
-import { capitalizeName } from '../utils/string-utils.js';
+import { capitalizeName, sanitizeTaskDescription } from '../utils/string-utils.js';
 import { SummaryCalculator } from '../services/summary-calculator.js';
 import type { LogTimeInput, TimeEntry } from '../types/index.js';
 
@@ -78,6 +78,9 @@ Claude should extract:
         const userInput = `${args.task || ''} ${args.duration || ''}`.trim();
         const company = getCompanyForOperation(args.company, userInput);
 
+        // Sanitize and validate task description
+        const sanitizedTask = sanitizeTaskDescription(args.task);
+
         // Parse inputs
         const duration = parseDuration(args.duration);
         const date = parseDate(args.date);
@@ -87,7 +90,7 @@ Claude should extract:
         // Create time entry
         const entry: TimeEntry = {
             time: formatTime(time),
-            task: args.task,
+            task: sanitizedTask,
             duration: duration.hours,
             tags,
             date: formatDate(date)
@@ -104,7 +107,7 @@ Claude should extract:
         const parseIssues = markdownManager.getParseIssues();
 
         // Build response
-        let response = `✓ Logged ${duration.formatted} for "${args.task}" at ${entry.time}`;
+        let response = `✓ Logged ${duration.formatted} for "${sanitizedTask}" at ${entry.time}`;
 
         if (args.date && args.date !== 'today') {
             response += ` on ${entry.date}`;
@@ -140,7 +143,7 @@ Claude should extract:
                 const limit = config.commitments[commitment]?.limit;
                 if (limit) {
                     const stats = summaryCalculator.getCommitmentStats(hours, limit);
-                    const warning = stats.status !== 'within' ? ' ⚠️' : '';
+                    const warning = stats.status !== 'within' ? ` ${stats.indicator}` : '';
                     response += `• ${capitalizeName(commitment)}: ${hours.toFixed(1)}h / ${limit}h (${stats.percentage}%)${warning}\n`;
                 }
             }

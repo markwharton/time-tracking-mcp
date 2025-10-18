@@ -6,6 +6,7 @@ import {
     ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { toolRegistry } from './tools/registry.js';
+import { validateConfiguredCompanies } from './utils/company-resolver.js';
 import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -27,6 +28,15 @@ class TimeTrackingMCPServer {
 
     constructor() {
         console.error(`[Time Tracking MCP] Initializing server v${packageJson.version}...`);
+
+        // Validate configured companies for path safety
+        try {
+            validateConfiguredCompanies();
+            console.error('[Time Tracking MCP] Company configuration validated');
+        } catch (error) {
+            console.error('[Time Tracking MCP] Configuration validation failed:', error);
+            throw error;
+        }
 
         this.server = new Server(
             {

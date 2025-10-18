@@ -73,9 +73,9 @@ export function formatCommitmentBreakdown(
             const stats = summaryCalculator.getCommitmentStats(hours, limit);
             output += `• ${name}: ${hours.toFixed(1)}h / ${limit}h (${stats.percentage}%)`;
 
-            // Add status emoji only for approaching or over
+            // Add status indicator only for approaching or over
             if (stats.status !== 'within') {
-                output += ` ${stats.emoji}`;
+                output += ` ${stats.indicator}`;
             }
             output += '\n';
         } else {

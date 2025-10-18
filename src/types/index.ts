@@ -118,3 +118,40 @@ export interface ParseIssues {
     formatVersion: string | null;
     warnings: string[];
 }
+
+/**
+ * Status indicator styles for commitment tracking
+ */
+export type CommitmentStatus = 'within' | 'approaching' | 'over';
+
+export interface StatusIndicators {
+    within: string;
+    approaching: string;
+    over: string;
+}
+
+/**
+ * Predefined status indicator themes
+ */
+export const STATUS_THEMES = {
+    /** Simple emoji indicators */
+    emoji: {
+        within: '✓',
+        approaching: '⚠️',
+        over: '🚫'
+    } as StatusIndicators,
+
+    /** Text-based indicators for reports */
+    text: {
+        within: '✓',
+        approaching: '⚠️ Close',
+        over: '🚫 OVER'
+    } as StatusIndicators,
+
+    /** Minimal text indicators */
+    simple: {
+        within: 'OK',
+        approaching: 'HIGH',
+        over: 'OVER'
+    } as StatusIndicators
+} as const;

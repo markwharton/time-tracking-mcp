@@ -81,9 +81,8 @@ export function parseDate(dateStr?: string): Date {
         return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
     }
 
-    // Default to today if can't parse
-    console.error(`[Time Tracking] Could not parse date: ${dateStr}, defaulting to today`);
-    return now();
+    // Invalid date - throw error instead of silent fallback
+    throw new Error(`Unable to parse date: "${dateStr}". Use format: "today", "yesterday", or "YYYY-MM-DD" (e.g., "2025-10-17")`);
 }
 
 /**
@@ -141,9 +140,8 @@ export function parseTime(timeStr?: string, baseDate?: Date): Date {
         return result;
     }
 
-    // Default to current time if can't parse
-    console.error(`[Time Tracking] Could not parse time: ${timeStr}, defaulting to now`);
-    return base;
+    // Invalid time - throw error instead of silent fallback
+    throw new Error(`Unable to parse time: "${timeStr}". Use format: "HH:MM" (e.g., "14:30"), "X hours ago", or "morning/afternoon/evening"`);
 }
 
 /**
@@ -157,6 +155,53 @@ export function getISOWeek(date: Date): { year: number; week: number } {
     const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
     const weekNum = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
     return { year: d.getUTCFullYear(), week: weekNum };
+}
+
+/**
+ * Get the number of ISO weeks in a given year
+ * Most years have 52 weeks, but some have 53
+ * A year has 53 weeks if:
+ * - It starts on Thursday, OR
+ * - It's a leap year that starts on Wednesday
+ */
+export function getWeeksInYear(year: number): number {
+    // Get January 1 of the year
+    const jan1 = new Date(year, 0, 1);
+    const jan1Day = jan1.getDay();
+
+    // Check if it's a leap year
+    const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+
+    // Year has 53 weeks if it starts on Thursday (4) or if it's a leap year starting on Wednesday (3)
+    if (jan1Day === 4 || (isLeap && jan1Day === 3)) {
+        return 53;
+    }
+
+    return 52;
+}
+
+/**
+ * Validate that a week number is within valid range for a given year
+ * @param year - Year to validate against
+ * @param week - Week number to validate
+ * @throws Error if week number is invalid
+ */
+export function validateWeekNumber(year: number, week: number): void {
+    // Check for reasonable year range (1900-2200)
+    if (year < 1900 || year > 2200) {
+        throw new Error(`Year ${year} is outside valid range (1900-2200)`);
+    }
+
+    // Check week is a positive integer
+    if (!Number.isInteger(week) || week < 1) {
+        throw new Error(`Week number must be a positive integer, got: ${week}`);
+    }
+
+    // Check week is within valid range for the year
+    const maxWeeks = getWeeksInYear(year);
+    if (week > maxWeeks) {
+        throw new Error(`Week ${week} is invalid for year ${year}. Year ${year} has ${maxWeeks} weeks (valid range: 1-${maxWeeks})`);
+    }
 }
 
 /**
