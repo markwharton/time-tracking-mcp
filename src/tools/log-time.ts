@@ -5,7 +5,11 @@ import { parseDuration } from '../services/duration-parser.js';
 import { parseDate, parseTime, formatDate, formatTime, getISOWeek } from '../utils/date-utils.js';
 import { createTextResponse, withErrorHandler } from '../utils/tool-response.js';
 import { getCompanyForOperation } from '../utils/company-resolver.js';
+import { capitalizeName } from '../utils/report-formatters.js';
+import { SummaryCalculator } from '../services/summary-calculator.js';
 import type { LogTimeInput, TimeEntry } from '../types/index.js';
+
+const summaryCalculator = new SummaryCalculator();
 
 const markdownManager = new MarkdownManager();
 
@@ -119,12 +123,12 @@ Claude should extract:
             const config = await markdownManager.loadConfig(company);
             if (config.commitments.total) {
                 const limit = config.commitments.total.limit;
-                const percent = Math.round((summary.totalHours / limit) * 100);
-                response += ` / ${limit}h (${percent}%)`;
+                const stats = summaryCalculator.getCommitmentStats(summary.totalHours, limit);
+                response += ` / ${limit}h (${stats.percentage}%)`;
 
-                if (percent > 100) {
+                if (stats.status === 'over') {
                     response += ` ⚠️ OVER LIMIT`;
-                } else if (percent > 90) {
+                } else if (stats.status === 'approaching') {
                     response += ` ⚠️ Close to limit`;
                 }
             }
@@ -135,9 +139,9 @@ Claude should extract:
             for (const [commitment, hours] of Object.entries(summary.byCommitment)) {
                 const limit = config.commitments[commitment]?.limit;
                 if (limit) {
-                    const percent = Math.round((hours / limit) * 100);
-                    const warning = percent > 100 ? ' ⚠️' : '';
-                    response += `• ${commitment.charAt(0).toUpperCase() + commitment.slice(1)}: ${hours.toFixed(1)}h / ${limit}h (${percent}%)${warning}\n`;
+                    const stats = summaryCalculator.getCommitmentStats(hours, limit);
+                    const warning = stats.status !== 'within' ? ' ⚠️' : '';
+                    response += `• ${capitalizeName(commitment)}: ${hours.toFixed(1)}h / ${limit}h (${stats.percentage}%)${warning}\n`;
                 }
             }
         }

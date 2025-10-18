@@ -5,6 +5,7 @@ import { formatDate, formatWeekHeader, getDayName, getWeekBounds, getISOWeek } f
 import { formatDuration, parseDuration } from './duration-parser.js';
 import { SummaryCalculator } from './summary-calculator.js';
 import { AuditLog } from './audit-log.js';
+import { formatTagsWithDefault, capitalizeName } from '../utils/report-formatters.js';
 import type { TimeEntry, DailySummary, WeeklySummary, CompanyConfig, ParseIssues } from '../types/index.js';
 
 export class MarkdownManager {
@@ -124,8 +125,9 @@ export class MarkdownManager {
      * Format a time entry as markdown line
      */
     private formatEntry(entry: TimeEntry): string {
-        const tags = entry.tags.length > 0 ? ' ' + entry.tags.map(t => '#' + t).join(' ') : '';
-        return '- ' + entry.time + ' ' + entry.task + ' (' + formatDuration(entry.duration) + ')' + tags;
+        const tags = formatTagsWithDefault(entry.tags, '');
+        const tagsStr = tags ? ' ' + tags : '';
+        return '- ' + entry.time + ' ' + entry.task + ' (' + formatDuration(entry.duration) + ')' + tagsStr;
     }
 
     /**
@@ -331,12 +333,12 @@ export class MarkdownManager {
         // Commitment breakdown
         for (const [commitment, hours] of Object.entries(summary.byCommitment)) {
             const limit = config.commitments[commitment]?.limit || 0;
-            const percent = limit > 0 ? Math.round((hours / limit) * 100) : 0;
-            const warning = percent > 100 ? ' ⚠️ OVER' : '';
+            const stats = this.summaryCalculator.getCommitmentStats(hours, limit);
+            const warning = stats.status === 'over' ? ' ⚠️ OVER' : '';
 
-            summaryText += '- **' + commitment.charAt(0).toUpperCase() + commitment.slice(1) + ':** ' + formatDuration(hours);
+            summaryText += '- **' + capitalizeName(commitment) + ':** ' + formatDuration(hours);
             if (limit > 0) {
-                summaryText += ' / ' + limit + 'h (' + percent + '%)' + warning;
+                summaryText += ' / ' + limit + 'h (' + stats.percentage + '%)' + warning;
             }
             summaryText += '\n';
         }

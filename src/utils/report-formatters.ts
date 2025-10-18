@@ -4,6 +4,114 @@
  * Following DRY principle - single source of truth for report formatting
  */
 
+import type { CompanyConfig, DailySummary } from '../types/index.js';
+import { SummaryCalculator } from '../services/summary-calculator.js';
+
+// Create singleton instance for utility functions
+const summaryCalculator = new SummaryCalculator();
+
+/**
+ * Capitalize first letter of a string
+ * @param str - String to capitalize
+ * @returns Capitalized string
+ */
+export function capitalizeName(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/**
+ * Format tags array as space-separated hashtags
+ * @param tags - Array of tag strings
+ * @returns Formatted tags string (e.g., "#dev #testing")
+ */
+export function formatTags(tags: string[]): string {
+    return tags.map(t => '#' + t).join(' ');
+}
+
+/**
+ * Format tags with default value if empty
+ * @param tags - Array of tag strings
+ * @param defaultValue - Value to return if tags array is empty
+ * @returns Formatted tags string or default value
+ */
+export function formatTagsWithDefault(tags: string[], defaultValue: string = ''): string {
+    return tags.length > 0 ? formatTags(tags) : defaultValue;
+}
+
+/**
+ * Sort daily summaries in descending order by date
+ * @param days - Array of daily summaries
+ * @returns New sorted array (does not mutate input)
+ */
+export function sortDaysDescending(days: DailySummary[]): DailySummary[] {
+    return [...days].sort((a, b) => b.date.localeCompare(a.date));
+}
+
+/**
+ * Format total hours with limit and percentage
+ * @param totalHours - Total hours worked
+ * @param config - Company configuration containing limits
+ * @param options - Formatting options
+ * @returns Formatted total hours string
+ */
+export function formatTotalHours(
+    totalHours: number,
+    config: CompanyConfig,
+    options?: { showRemaining?: boolean }
+): string {
+    let output = `**Total:** ${totalHours.toFixed(1)}h`;
+
+    const totalLimit = config.commitments.total?.limit;
+    if (totalLimit) {
+        const percent = Math.round((totalHours / totalLimit) * 100);
+        output += ` / ${totalLimit}h (${percent}%)`;
+
+        if (options?.showRemaining) {
+            const remaining = Math.max(0, totalLimit - totalHours);
+            output += ` (${remaining.toFixed(1)}h remaining)`;
+        }
+    }
+
+    return output + '\n\n';
+}
+
+/**
+ * Format commitment breakdown with hours, limits, and status indicators
+ * @param byCommitment - Map of commitment names to hours
+ * @param config - Company configuration containing limits
+ * @returns Formatted commitment breakdown string, or empty string if no commitments
+ */
+export function formatCommitmentBreakdown(
+    byCommitment: Record<string, number>,
+    config: CompanyConfig
+): string {
+    if (Object.keys(byCommitment).length === 0) {
+        return '';
+    }
+
+    let output = `**By Commitment:**\n`;
+
+    for (const [commitment, hours] of Object.entries(byCommitment)) {
+        const limit = config.commitments[commitment]?.limit;
+        const name = capitalizeName(commitment);
+
+        if (limit) {
+            const stats = summaryCalculator.getCommitmentStats(hours, limit);
+            output += `• ${name}: ${hours.toFixed(1)}h / ${limit}h (${stats.percentage}%)`;
+
+            // Add status emoji only for approaching or over
+            if (stats.status !== 'within') {
+                output += ` ${stats.emoji}`;
+            }
+            output += '\n';
+        } else {
+            output += `• ${name}: ${hours.toFixed(1)}h\n`;
+        }
+    }
+
+    return output + '\n';
+}
+
 /**
  * Format project breakdown section
  * @param byProject - Map of project names to hours

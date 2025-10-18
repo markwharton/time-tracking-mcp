@@ -1,6 +1,7 @@
 // src/services/audit-log.ts
 import { TimeTrackingEnvironment } from '../config/environment.js';
 import { writeFileSafe } from '../utils/file-utils.js';
+import { formatTagsWithDefault } from '../utils/report-formatters.js';
 import type { TimeEntry } from '../types/index.js';
 import { appendFile } from 'fs/promises';
 import { join } from 'path';
@@ -26,7 +27,7 @@ export class AuditLog {
         const logPath = this.getAuditLogPath(company);
 
         // Format: ISO8601_TIMESTAMP | OPERATION | DATE | TIME | DURATION | TASK | TAGS
-        const tags = entry.tags.length > 0 ? entry.tags.map(t => '#' + t).join(' ') : 'no-tags';
+        const tags = formatTagsWithDefault(entry.tags, 'no-tags');
         const logLine = `${timestamp} | ${operation} | ${entry.date} | ${entry.time} | ${entry.duration.toFixed(2)}h | ${entry.task} | ${tags}\n`;
 
         try {

@@ -1,4 +1,5 @@
 // src/services/summary-calculator.ts
+import { capitalizeName } from '../utils/report-formatters.js';
 import type { TimeEntry, DailySummary, WeeklySummary, CompanyConfig } from '../types/index.js';
 
 /**
@@ -196,7 +197,7 @@ export class SummaryCalculator {
         if (Object.keys(summary.byCommitment).length > 0) {
             for (const [commitment, hours] of Object.entries(summary.byCommitment)) {
                 const limit = config.commitments[commitment]?.limit;
-                const name = commitment.charAt(0).toUpperCase() + commitment.slice(1);
+                const name = capitalizeName(commitment);
 
                 if (limit) {
                     const stats = this.getCommitmentStats(hours, limit);

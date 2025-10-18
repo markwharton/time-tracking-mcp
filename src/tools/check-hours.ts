@@ -4,7 +4,14 @@ import { MarkdownManager } from '../services/markdown-manager.js';
 import { getISOWeek, now, formatDate, getDayName } from '../utils/date-utils.js';
 import { createTextResponse, withErrorHandler, MULTI_COMPANY_GUIDANCE } from '../utils/tool-response.js';
 import { getCompanyForOperation } from '../utils/company-resolver.js';
-import { formatProjectBreakdown, formatTagBreakdown } from '../utils/report-formatters.js';
+import {
+    formatProjectBreakdown,
+    formatTagBreakdown,
+    formatTotalHours,
+    formatCommitmentBreakdown,
+    formatTagsWithDefault,
+    sortDaysDescending
+} from '../utils/report-formatters.js';
 import type { CheckHoursInput } from '../types/index.js';
 
 const markdownManager = new MarkdownManager();
@@ -89,8 +96,9 @@ async function handleToday(company: string, date: Date): Promise<any> {
     response += `**Entries:**\n`;
 
     for (const entry of daySummary.entries) {
-        const tags = entry.tags.length > 0 ? ' ' + entry.tags.map(t => '#' + t).join(' ') : '';
-        response += `• ${entry.time} ${entry.task} (${entry.duration.toFixed(1)}h)${tags}\n`;
+        const tags = formatTagsWithDefault(entry.tags, '');
+        const tagsStr = tags ? ' ' + tags : '';
+        response += `• ${entry.time} ${entry.task} (${entry.duration.toFixed(1)}h)${tagsStr}\n`;
     }
 
     return createTextResponse(response);
@@ -105,32 +113,8 @@ async function handleWeek(company: string, year: number, week: number, breakdown
     }
 
     let response = `📊 **Week ${week} Summary**\n\n`;
-    response += `**Total:** ${summary.totalHours.toFixed(1)}h`;
-
-    const totalLimit = config.commitments.total?.limit;
-    if (totalLimit) {
-        const percent = Math.round((summary.totalHours / totalLimit) * 100);
-        response += ` / ${totalLimit}h (${percent}%)`;
-    }
-    response += '\n\n';
-
-    // Commitment breakdown
-    if (Object.keys(summary.byCommitment).length > 0) {
-        response += `**By Commitment:**\n`;
-        for (const [commitment, hours] of Object.entries(summary.byCommitment)) {
-            const limit = config.commitments[commitment]?.limit;
-            const name = commitment.charAt(0).toUpperCase() + commitment.slice(1);
-
-            if (limit) {
-                const percent = Math.round((hours / limit) * 100);
-                const warning = percent > 100 ? ' ⚠️' : '';
-                response += `• ${name}: ${hours.toFixed(1)}h / ${limit}h (${percent}%)${warning}\n`;
-            } else {
-                response += `• ${name}: ${hours.toFixed(1)}h\n`;
-            }
-        }
-        response += '\n';
-    }
+    response += formatTotalHours(summary.totalHours, config);
+    response += formatCommitmentBreakdown(summary.byCommitment, config);
 
     // Project breakdown
     if (breakdown) {
@@ -144,7 +128,7 @@ async function handleWeek(company: string, year: number, week: number, breakdown
 
     // Daily breakdown
     response += `**By Day:**\n`;
-    for (const day of summary.days.sort((a, b) => b.date.localeCompare(a.date))) {
+    for (const day of sortDaysDescending(summary.days)) {
         const dayName = getDayName(new Date(day.date));
         response += `• ${dayName} ${day.date}: ${day.totalHours.toFixed(1)}h (${day.entries.length} entries)\n`;
     }
