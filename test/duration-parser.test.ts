@@ -32,16 +32,16 @@ describe('Duration Parser', () => {
     });
 
     describe('Validation - minimum duration', () => {
-        it('should reject durations under 5 minutes', () => {
+        it('should reject durations under 3 minutes', () => {
             assert.throws(
                 () => parseDuration('1m'),
-                /Duration too short.*Minimum duration is 5 minutes/
+                /Duration too short.*Minimum duration is 3 minutes/
             );
         });
 
-        it('should accept exactly 5 minutes', () => {
-            const result = parseDuration('5m');
-            assert.ok(result.hours >= 0.08); // 5 minutes ≈ 0.083h
+        it('should accept exactly 3 minutes', () => {
+            const result = parseDuration('3m');
+            assert.ok(result.hours >= 0.05); // 3 minutes = 0.05h
         });
     });
 

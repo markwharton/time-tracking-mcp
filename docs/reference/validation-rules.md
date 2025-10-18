@@ -19,7 +19,7 @@ All user inputs are validated to prevent:
 
 | Rule | Value | Reason |
 |------|-------|--------|
-| **Minimum Duration** | 5 minutes (0.08h) | Prevents accidental micro-entries |
+| **Minimum Duration** | 3 minutes (0.05h) | Prevents accidental micro-entries |
 | **Maximum Duration** | 24 hours | Prevents unrealistic per-entry durations |
 | **No Negative Values** | Must be positive | Durations cannot be negative |
 | **Finite Values Only** | No Infinity/NaN | Ensures valid calculations |
@@ -38,7 +38,7 @@ PT2H30M         → ISO 8601 (2.5 hours)
 
 ❌ **Invalid Examples:**
 ```
-1m              → Too short (< 5 min)
+1m              → Too short (< 3 min)
 25h             → Too long (> 24h)
 -5h             → Negative value
 abc             → Invalid format
@@ -47,7 +47,7 @@ abc             → Invalid format
 ### Error Messages
 
 ```
-Duration too short: "1m". Minimum duration is 5 minutes (0.08h)
+Duration too short: "1m". Minimum duration is 3 minutes (0.05h)
 Duration too long: "25h". Maximum duration is 24 hours per entry
 Duration cannot be negative: "-5h"
 Unable to parse duration: "abc". Try formats like "2h", "90m", or "1.5h"
@@ -328,7 +328,7 @@ See `test/` directory for full test suite.
 
 | Input Type | Min | Max | Special Rules |
 |------------|-----|-----|---------------|
-| Duration | 5 min | 24h | Positive, finite |
+| Duration | 3 min | 24h | Positive, finite |
 | Task | 1 char | 500 chars | Sanitized, no markdown headers |
 | Company Name | 1 char | 100 chars | No path separators, no leading `.` |
 | Week Number | 1 | 52-53 | Integer, year-dependent |

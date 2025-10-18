@@ -4,7 +4,7 @@ import type { Duration } from '../types/index.js';
 /**
  * Duration validation constants
  */
-const MIN_DURATION_HOURS = 0.08; // 5 minutes minimum (rounded from 1/12 hour)
+const MIN_DURATION_HOURS = 0.05; // 3 minutes minimum
 const MAX_DURATION_HOURS = 24;   // 24 hours maximum per entry
 
 /**
@@ -12,7 +12,7 @@ const MAX_DURATION_HOURS = 24;   // 24 hours maximum per entry
  */
 function validateDuration(hours: number, input: string): void {
     if (hours < MIN_DURATION_HOURS) {
-        throw new Error(`Duration too short: "${input}". Minimum duration is 5 minutes (0.08h)`);
+        throw new Error(`Duration too short: "${input}". Minimum duration is 3 minutes (0.05h)`);
     }
     if (hours > MAX_DURATION_HOURS) {
         throw new Error(`Duration too long: "${input}". Maximum duration is 24 hours per entry`);

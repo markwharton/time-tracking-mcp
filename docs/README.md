@@ -71,7 +71,7 @@ Complete markdown file format specification.
 Comprehensive input validation rules for data integrity and security.
 
 **Topics covered:**
-- Duration validation (min: 5min, max: 24h)
+- Duration validation (min: 3min, max: 24h)
 - Task description sanitization (markdown injection prevention)
 - Date/time parsing rules and formats
 - Company name security (path traversal prevention)
