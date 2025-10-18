@@ -67,6 +67,21 @@ Complete markdown file format specification.
 
 **When to read:** When working with markdown file parsing or format changes.
 
+### [Validation Rules](reference/validation-rules.md)
+Comprehensive input validation rules for data integrity and security.
+
+**Topics covered:**
+- Duration validation (min: 5min, max: 24h)
+- Task description sanitization (markdown injection prevention)
+- Date/time parsing rules and formats
+- Company name security (path traversal prevention)
+- Week number validation (ISO weeks, 52-53 per year)
+- Configuration validation (JSON syntax)
+- Error messages and examples
+- Testing coverage
+
+**When to read:** When you encounter validation errors, need to understand input constraints, or are implementing features that handle user input.
+
 ### [Configuration Schema](example-config.json)
 Example company configuration file with all available options.
 
@@ -181,6 +196,8 @@ When adding new documentation:
 | Project configuration | [Tag System Design](architecture/tag-system.md) | Project Matching |
 | Multi-company setup | [Multi-Company Patterns](architecture/multi-company-patterns.md) | Pattern 1 vs 2 |
 | Entry format | [Format Specification](reference/format-specification.md) | Entry Line Format |
+| Input validation | [Validation Rules](reference/validation-rules.md) | All Rules |
+| Error messages | [Validation Rules](reference/validation-rules.md) | Error Messages |
 | Environment variables | [Claude Desktop Setup](setup/claude-desktop.md) | Environment Configuration |
 | Development workflow | [Development Guide](guides/development.md) | Project Structure |
 | Code principles | [Development Principles](architecture/development-principles.md) | Core Principles |
