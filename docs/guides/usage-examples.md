@@ -41,13 +41,13 @@ You: "Documentation work 1h #development"
 When you have projects configured, Claude automatically groups your time:
 
 ```
-You: "2h on Time Tracking MCP"
-# Automatically tagged with #development #mcp #typescript
-# Grouped under "Time Tracking MCP" project
+You: "2h on MCP development #dev #mcp"
+# Routes to "Time Tracking MCP" project via #mcp tag
+# Counts toward development commitment via #dev → development mapping
 
-You: "1h on Conduit security review"
-# Automatically tagged with #development #security
-# Grouped under "Conduit MCP" project
+You: "1h on Conduit security review #dev #conduit"
+# Routes to "Conduit MCP" project via #conduit tag
+# Counts toward development commitment
 ```
 
 ### Retroactive Entries

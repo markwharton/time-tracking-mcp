@@ -27,7 +27,7 @@ Weekly files follow the ISO 8601 week format:
 
 ### File Location
 
-Files are organized by company:
+**Multi-Company Mode** (when `COMPANIES` env var is set):
 ```
 ~/Documents/time-tracking/
   {CompanyName}/
@@ -36,6 +36,17 @@ Files are organized by company:
     2025-W43.md
     audit.log
 ```
+
+**Single-Company Mode** (when `COMPANIES` env var is NOT set):
+```
+~/Documents/time-tracking/
+  config.json
+  2025-W42.md
+  2025-W43.md
+  audit.log
+```
+
+See [Multi-Company Patterns](../architecture/multi-company-patterns.md) for detailed information about both organizational approaches.
 
 ## Format Structure
 

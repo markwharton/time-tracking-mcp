@@ -43,11 +43,11 @@ Create `~/Documents/time-tracking/HeliMods/config.json`:
   },
   "projects": {
     "Time Tracking MCP": {
-      "tags": ["development", "mcp", "typescript"],
+      "tags": ["mcp"],
       "commitment": "development"
     },
     "Conduit MCP": {
-      "tags": ["development", "security"],
+      "tags": ["conduit"],
       "commitment": "development"
     }
   },
@@ -139,7 +139,7 @@ You: "Show me this week's report"
 Claude: [Detailed weekly report with breakdown by day, project, and tags]
 ```
 
-See [docs/usage-examples.md](docs/usage-examples.md) for more examples and advanced features.
+See [docs/guides/usage-examples.md](docs/guides/usage-examples.md) for more examples and advanced features.
 
 ## How It Works
 
@@ -424,7 +424,7 @@ You never call these directly - just talk to Claude naturally!
 
 ## Development
 
-See [DEVELOPMENT.md](DEVELOPMENT.md) for developer documentation.
+See [docs/guides/development.md](docs/guides/development.md) for developer documentation.
 
 ```bash
 npm run build        # Compile TypeScript

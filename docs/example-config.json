@@ -16,20 +16,16 @@
   },
   "projects": {
     "Conduit MCP": {
-      "tags": ["development", "security", "database"],
+      "tags": ["conduit"],
       "commitment": "development"
     },
     "Internal Tools": {
-      "tags": ["development", "tooling", "automation"],
+      "tags": ["internal", "tooling"],
       "commitment": "development"
     },
     "Client Work": {
-      "tags": ["consulting", "implementation"],
+      "tags": ["client", "consulting"],
       "commitment": "development"
-    },
-    "Meetings": {
-      "tags": ["meeting", "standup", "planning"],
-      "commitment": "meeting"
     }
   },
   "tagMappings": {
