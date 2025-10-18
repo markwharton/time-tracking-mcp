@@ -209,7 +209,7 @@ flowchart TD
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `TIME_TRACKING_DIR` | Where to store markdown files | `~/Documents/time-tracking` |
-| `COMPANIES` | Comma-separated list of companies | `default` |
+| `COMPANIES` | Comma-separated list of companies (enables multi-company mode). Omit for single-company mode. | None (single-company mode) |
 | `COMPANY_ABBREVIATIONS` | Company name abbreviations for quick entry (format: `Company:abbr1:abbr2,Company2:abbr3`) | None |
 | `DISPLAY_TIMEZONE_OFFSET` | Hours offset from UTC for display | `0` |
 | `DISPLAY_TIMEZONE_STRING` | Timezone name for display | `UTC` |
