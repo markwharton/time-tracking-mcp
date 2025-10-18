@@ -67,3 +67,14 @@ When starting a task:
 5. Test your assumptions before implementing changes
 
 The tag system is the heart of this application - understanding tag-system.md is essential for working on any features related to commitments, projects, or reporting.
+
+## Presenting Tool Output
+
+When presenting MCP tool results to the user:
+- **Preserve the original formatting** from tool responses
+- Do NOT remove emojis or reformatting that comes from tools
+- Do NOT reformat structured output into different markdown structures
+- Formatting restrictions (emojis, markdown style) apply to **files you create/edit**, not to conversational responses
+- Tool output is already optimized for display - present it as-is or with minimal reformatting
+
+Example: If a tool returns data with emojis and specific line breaks, show it that way rather than removing emojis or condensing lines.
