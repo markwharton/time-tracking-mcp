@@ -115,6 +115,9 @@ export class MarkdownManager {
             content = this.normalizeEntryDurations(content);
         }
 
+        // Normalize spacing for consistent formatting
+        content = this.normalizeSpacing(content);
+
         await writeFileSafe(filePath, content);
 
         // Log to audit log
@@ -408,6 +411,161 @@ export class MarkdownManager {
         }
 
         return normalizedLines.join('\n');
+    }
+
+    /**
+     * Normalize spacing between sections for consistent formatting
+     * Ensures consistent blank lines while preserving user content
+     */
+    private normalizeSpacing(content: string): string {
+        const lines = content.split('\n');
+        const normalized: string[] = [];
+
+        let prevLineType: 'blank' | 'separator' | 'dayHeader' | 'entry' | 'title' | 'summaryHeader' | 'other' = 'other';
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const isBlank = /^\s*$/.test(line);
+            const isSeparator = /^---$/.test(line);
+            const isDayHeader = /^## \d{4}-\d{2}-\d{2}/.test(line);
+            const isEntry = /^- \d{2}:\d{2}/.test(line);
+            const isTitle = /^# Time Tracking/.test(line);
+            const isSummaryHeader = /^## Summary$/.test(line);
+            const isFormatComment = /^<!--/.test(line);
+            const isUserContent = !isBlank && !isSeparator && !isDayHeader && !isEntry &&
+                                  !isTitle && !isSummaryHeader && !isFormatComment &&
+                                  !/^- \*\*/.test(line); // Not a summary line
+
+            // Handle blank lines
+            if (isBlank) {
+                // Look ahead to see what comes next (skip other blanks)
+                const nextNonBlank = lines.slice(i + 1).find(l => !/^\s*$/.test(l));
+                const nextIsDayHeader = nextNonBlank && /^## \d{4}-\d{2}-\d{2}/.test(nextNonBlank);
+                const nextIsSummaryHeader = nextNonBlank && /^## Summary$/.test(nextNonBlank);
+
+                // Keep blank line after title
+                if (prevLineType === 'title') {
+                    if (normalized[normalized.length - 1] !== '') {
+                        normalized.push('');
+                        prevLineType = 'blank';
+                    }
+                    continue;
+                }
+
+                // Keep blank line after separator
+                if (prevLineType === 'separator') {
+                    if (normalized[normalized.length - 1] !== '') {
+                        normalized.push('');
+                        prevLineType = 'blank';
+                    }
+                    continue;
+                }
+
+                // Keep blank line after day header
+                if (prevLineType === 'dayHeader') {
+                    if (normalized[normalized.length - 1] !== '') {
+                        normalized.push('');
+                        prevLineType = 'blank';
+                    }
+                    continue;
+                }
+
+                // Keep one blank line before summary header
+                if (nextIsSummaryHeader) {
+                    if (normalized[normalized.length - 1] !== '') {
+                        normalized.push('');
+                        prevLineType = 'blank';
+                    }
+                    continue;
+                }
+
+                // Keep one blank line before day header
+                if (nextIsDayHeader) {
+                    if (normalized[normalized.length - 1] !== '') {
+                        normalized.push('');
+                        prevLineType = 'blank';
+                    }
+                    continue;
+                }
+
+                // Skip blank lines after entries (they'll be added before user content/day header if needed)
+                if (prevLineType === 'entry') {
+                    continue;
+                }
+
+                // Skip consecutive blank lines
+                if (prevLineType === 'blank') {
+                    continue;
+                }
+
+                // Preserve other blank lines (potential user content separators)
+                normalized.push('');
+                prevLineType = 'blank';
+                continue;
+            }
+
+            // Ensure blank line after separator
+            if (prevLineType === 'separator' && normalized[normalized.length - 1] !== '') {
+                normalized.push('');
+            }
+
+            // Ensure blank line after day header
+            if (prevLineType === 'dayHeader' && normalized[normalized.length - 1] !== '') {
+                normalized.push('');
+            }
+
+            // Ensure blank line before summary header (if not already present)
+            // This also handles spacing after title
+            if (isSummaryHeader && prevLineType !== 'blank' && normalized.length > 0) {
+                normalized.push('');
+            }
+
+            // Ensure blank line before day header (if not already present)
+            if (isDayHeader && prevLineType !== 'blank' && prevLineType !== 'separator' && normalized.length > 0) {
+                normalized.push('');
+            }
+
+            // Ensure blank line before user content (to prevent confusion with entries)
+            if (isUserContent && (prevLineType === 'entry' || prevLineType === 'other') && normalized[normalized.length - 1] !== '') {
+                // Look back to see if we just had entries or user content
+                const lastNonBlank = [...normalized].reverse().find(l => !/^\s*$/.test(l));
+                const hadRecentEntry = lastNonBlank && /^- \d{2}:\d{2}/.test(lastNonBlank);
+
+                if (hadRecentEntry) {
+                    normalized.push('');
+                }
+            }
+
+            // Add the line
+            normalized.push(line);
+
+            // Ensure blank line after user content before entries (to prevent confusion)
+            if (isUserContent) {
+                const nextNonBlank = lines.slice(i + 1).find(l => !/^\s*$/.test(l));
+                const nextIsEntry = nextNonBlank && /^- \d{2}:\d{2}/.test(nextNonBlank);
+
+                if (nextIsEntry) {
+                    normalized.push('');
+                }
+            }
+
+            // Update state
+            if (isTitle) {
+                prevLineType = 'title';
+            } else if (isSummaryHeader) {
+                prevLineType = 'summaryHeader';
+            } else if (isSeparator) {
+                prevLineType = 'separator';
+            } else if (isDayHeader) {
+                prevLineType = 'dayHeader';
+            } else if (isEntry) {
+                prevLineType = 'entry';
+            } else {
+                prevLineType = 'other';
+            }
+        }
+
+        return normalized.join('\n');
     }
 
     private cachedConfig: CompanyConfig | null = null;
